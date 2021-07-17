@@ -6,40 +6,42 @@
 namespace ft
 {
 	template <class T>
-		class Iterator : public std::iterator<std::random_access_iterator_tag, T>
+	class Iterator : public std::iterator<std::random_access_iterator_tag, T>
 	{
 		T	*_ptr;
+		Iterator(T *p) _ptr(p) {};
+		
 		public:
-		Iterator();
-		Iterator(Iterator const &x) { *this = x; };
-		Iterator	&operator =(Iterator const &x) { _ptr = &(*x); return *this; };
-		~Iterator();
+			Iterator();
+			Iterator(Iterator const &x) { *this = x; };
+			Iterator	&operator =(Iterator const &x) { _ptr = &(*x); return *this; };
+			~Iterator();
 
-		bool			operator ==(Iterator const &) const;
-		bool			operator !=(Iterator const &) const;
+			bool			operator ==(Iterator const &x) const { return _ptr == x.ptr };
+			bool			operator !=(Iterator const &x) const { return _ptr != x.ptr };
 
-		T const			&operator *() const;
-		T				&operator *() { return (*_ptr); };
+			T const			&operator *() const { return (*_ptr) };
+			T				&operator *() { return (*_ptr); };
 
-		Iterator		&operator ++() { ++_ptr; return *this; };
-		Iterator		&operator ++(int);
+			Iterator		&operator ++() { ++_ptr; return *this; };
+			Iterator		&operator ++(int);
 
-		Iterator		&operator --() { --_ptr; return *this; };
-		Iterator		&operator --(int);
+			Iterator		&operator --() { --_ptr; return *this; };
+			Iterator		&operator --(int);
 
-		Iterator		&operator +(int);
-		Iterator		&operator +(Iterator const &);
-		Iterator		&operator -(int);
+			Iterator		&operator +(int);
+			Iterator		&operator +(Iterator const &);
+			Iterator		&operator -(int);
 
-		bool			operator >(Iterator const &) const;
-		bool			operator <(Iterator const &) const;
-		bool			operator >=(Iterator const &) const;
-		bool			operator <=(Iterator const &) const;
+			bool			operator >(Iterator const &) const;
+			bool			operator <(Iterator const &) const;
+			bool			operator >=(Iterator const &) const;
+			bool			operator <=(Iterator const &) const;
 
-		void			operator +=(int);
-		void			operator -=(int);
+			void			operator +=(int);
+			void			operator -=(int);
 
-		T				&operator [](size_t);
+			T				&operator [](size_t);
 	};
 	template <class T, class Alloc = std::allocator<T> >
 		class vector
