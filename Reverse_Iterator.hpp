@@ -67,6 +67,26 @@ namespace ft
 				reference			operator[] (difference_type n) const
 				{ return (_base_iterator[-n - 1]); }
 
+				
+				friend bool operator ==(const Reverse_Iterator<Iterator>& lhs,
+					const Reverse_Iterator<Iterator>& rhs);
+				friend bool operator !=(const Reverse_Iterator<Iterator>& lhs,
+					const Reverse_Iterator<Iterator>& rhs);
+				friend bool operator <(const Reverse_Iterator<Iterator>& lhs,
+					const Reverse_Iterator<Iterator>& rhs);
+				friend bool operator <=(const Reverse_Iterator<Iterator>& lhs,
+					const Reverse_Iterator<Iterator>& rhs);
+				friend bool operator >(const Reverse_Iterator<Iterator>& lhs,
+					const Reverse_Iterator<Iterator>& rhs);
+				friend bool operator >=(const Reverse_Iterator<Iterator>& lhs,
+					const Reverse_Iterator<Iterator>& rhs);
+				friend Reverse_Iterator<Iterator> operator +(
+					typename Reverse_Iterator<Iterator>::difference_type n,
+					const Reverse_Iterator<Iterator>& rev_it);
+				friend typename Reverse_Iterator<Iterator>::difference_type operator -(
+					const Reverse_Iterator<Iterator>& lhs,
+					const Reverse_Iterator<Iterator>& rhs);
+
 			private:
 				iterator_type	_base_iterator;
 		};
