@@ -4,6 +4,7 @@
 # include "Vector_Iterator.hpp"
 # include "Iterator_Traits.hpp"
 # include "Reverse_Iterator.hpp"
+# include "types_traits.hpp"
 
 namespace ft
 {
@@ -26,7 +27,7 @@ namespace ft
 				explicit Vector(const allocator_type &alloc = allocator_type()) :
 					_allocator(alloc), _ptr(nullptr), _size(0), _capacity(0) {}
 
-				explicit Vector(size_type n, const value_type &val = value_type(),
+				explicit Vector(size_type n, const size_type &val = value_type(),
 						const allocator_type &alloc = allocator_type()) :
 					_allocator(alloc), _size(n), _capacity(n)
 				{
@@ -38,10 +39,12 @@ namespace ft
 					}
 					else _ptr = nullptr;
 				}
-				/*
+				
 				template <class InputIter>
-					Vector(InputIter first, InputIter last, const allocator_type &alloc = allocator_type());
-					*/
+					Vector(InputIter first, InputIter last,
+							typename ft::enable_if<!ft::is_integral<InputIter>::value>::type,
+							const allocator_type &alloc = allocator_type());
+					
 				Vector(const Vector &x)
 				{
 					*this = x;
