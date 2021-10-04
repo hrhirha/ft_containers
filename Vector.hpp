@@ -12,15 +12,15 @@ namespace ft
 	{
 		public:
 			typedef typename std::iterator<std::random_access_iterator_tag, T>::difference_type
-			difference_type;
+				difference_type;
 			typedef typename std::iterator<std::random_access_iterator_tag, T>::value_type
-			value_type;
+				value_type;
 			typedef typename std::iterator<std::random_access_iterator_tag, T>::pointer
-			pointer;
+				pointer;
 			typedef typename std::iterator<std::random_access_iterator_tag, T>::reference
-			reference;
+				reference;
 			typedef typename std::iterator<std::random_access_iterator_tag, T>::iterator_category
-			iterator_category;
+				iterator_category;
 
 			Iterator();
 			Iterator(Iterator const &x) { *this = x; };
@@ -28,10 +28,8 @@ namespace ft
 
 			~Iterator() {};
 
-			T const			&operator *() const { return (*_ptr); };
-			T				&operator *() { return (*_ptr); };
-			T const			*operator ->() const { return &(*_ptr); };
-			T				*operator ->() { return &(*_ptr); };
+			reference		operator *() { return (*_ptr); };
+			pointer			operator ->() { return &(*_ptr); };
 
 			Iterator		&operator ++() { ++_ptr; return *this; };
 			Iterator		&operator ++(int) { Iterator tmp = *this; ++(*this); return (tmp); };
@@ -39,8 +37,8 @@ namespace ft
 			Iterator		&operator --() { --_ptr; return *this; };
 			Iterator		&operator --(int) { Iterator tmp = *this; --(*this); return (tmp); };
 
-			T				&operator +=(int n) { _ptr += n; };
-			T				&operator -=(int n) { _ptr -= n; };
+			Iterator		&operator +=(int n) { _ptr += n; return *this; };
+			Iterator		&operator -=(int n) { _ptr -= n; return *this; };
 
 			Iterator		&operator +(int n) { return (Iterator(_ptr + n)); };
 			Iterator		&operator -(int n) { return (Iterator(_ptr - n)); };
@@ -54,10 +52,11 @@ namespace ft
 			bool			operator <=(Iterator const &x) const { return _ptr <= x._ptr; };
 
 			T				&operator [](size_t n) { return *this + n; };
+			
+			Iterator(T *p) : _ptr(p) {};
 
 		private:
 			T	*_ptr;
-			Iterator(T *p) : _ptr(p) {};
 	};
 
 	template <class T>
@@ -113,8 +112,8 @@ namespace ft
 				
 				~Vector() {};
 
-				iterator begin() {return ft::Iterator<value_type>(_ptr); }
-				const_iterator begin() const;
+				iterator begin() {return iterator(_ptr); }
+				const_iterator begin() const {return const_iterator(_ptr); };
 
 			private:
 				allocator_type	_allocator;
