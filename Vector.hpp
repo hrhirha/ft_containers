@@ -266,7 +266,36 @@ namespace ft
 				}
 				template <class InputIterator>
 					void insert (iterator position, InputIterator first, InputIterator last,
-						typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type* t = 0);
+						typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type* t = 0)
+					{
+						(void)t;
+						size_type n = last - first;
+						if (_capacity >= _size + n)
+						{
+							iterator it = end();
+							for (; it >= position; it--)
+							{
+								*(it+n) = *it;
+							}
+							for(; first != last; first++)
+								*(++it) = *first;
+						}
+						else
+						{
+							size_type new_cap = _capacity;
+							while (new_cap < _size + n) new_cap *= 2;
+							pointer tmp = _allocator.allocate(new_cap);
+							size_type i = 0;
+							iterator it = begin();
+							for (; it < position; it++) tmp[i++] = *it;
+							for (; first != last; first++) tmp[i++] = *first;
+							for (; it < end(); it++) tmp[i++] = *it;
+							_allocator.deallocate(_ptr, _capacity);
+							_ptr = tmp;
+							_capacity = new_cap;
+						}
+						_size += n;
+					}
 
 			private:
 				allocator_type	_allocator;
