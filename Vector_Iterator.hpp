@@ -31,17 +31,17 @@ namespace ft
 			pointer			operator ->() { return &(*_ptr); };
 
 			Iterator		&operator ++() { ++_ptr; return *this; };
-			Iterator		&operator ++(int) { Iterator tmp = *this; ++(*this); return (tmp); };
+			Iterator		operator ++(int) { Iterator tmp = *this; ++(*this); return (tmp); };
 
 			Iterator		&operator --() { --_ptr; return *this; };
-			Iterator		&operator --(int) { Iterator tmp = *this; --(*this); return (tmp); };
+			Iterator		operator --(int) { Iterator tmp = *this; --(*this); return (tmp); };
 
 			Iterator		&operator +=(int n) { _ptr += n; return *this; };
 			Iterator		&operator -=(int n) { _ptr -= n; return *this; };
 
-			Iterator		&operator +(int n) { return (Iterator(_ptr + n)); };
-			Iterator		&operator -(int n) { return (Iterator(_ptr - n)); };
-			difference_type	operator -(Iterator const &x) { return (Iterator(_ptr - x._ptr)); };
+			Iterator		operator +(int n) const { return (Iterator(_ptr + n)); };
+			Iterator		operator -(int n) const { return (Iterator(_ptr - n)); };
+			difference_type	operator -(Iterator const &x) const { return (_ptr - x._ptr); };
 
 			bool			operator ==(Iterator const &x) const { return _ptr == x._ptr; };
 			bool			operator !=(Iterator const &x) const { return _ptr != x._ptr; };

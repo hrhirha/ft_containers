@@ -39,24 +39,30 @@ namespace ft
 					}
 					else _ptr = nullptr;
 				}
-				
+
 				template <class InputIter>
 					Vector(InputIter first, InputIter last,
-							typename ft::enable_if<!ft::is_integral<InputIter>::value>::type,
-							const allocator_type &alloc = allocator_type());
-					
-				Vector(const Vector &x)
+					typename ft::enable_if<!ft::is_integral<InputIter>::value, InputIter>::type* t = 0,
+							const allocator_type &alloc = allocator_type())
+					{
+						_capacity = last - first;
+						_size = _capacity;
+						_ptr = _allocator.allocate(_capacity);
+						for (size_type i = 0; i < _size; i++)
+							_ptr[i] = *(first++);
+					}
+
+				Vector(const Vector &x) : _capacity(0), _size(0), _ptr(nullptr)
 				{
 					*this = x;
 				}
 				Vector	&operator =(const Vector &x)
 				{
-					if (_capacity)
-						_allocator.deallocate(_ptr, _capacity);
+					if (_capacity) _allocator.deallocate(_ptr, _capacity);
 					_allocator = x._allocator;
 					_size = x._size;
 					_capacity = x._capacity;
-					_ptr = allocate(_capacity);
+					_ptr = _allocator.allocate(_capacity);
 					for (size_type i = 0; i < _size; i++)
 						_ptr[i] = x._ptr[i];
 					return *this;
