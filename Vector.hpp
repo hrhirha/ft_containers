@@ -46,6 +46,7 @@ namespace ft
 					typename ft::enable_if<!ft::is_integral<InputIter>::value, InputIter>::type* t = 0,
 							const allocator_type &alloc = allocator_type())
 					{
+						(void)t;
 						_capacity = last - first;
 						_size = _capacity;
 						_ptr = _allocator.allocate(_capacity);
@@ -60,7 +61,6 @@ namespace ft
 				Vector	&operator =(const Vector &x)
 				{
 					if (_capacity) _allocator.deallocate(_ptr, _capacity);
-					_allocator = x._allocator;
 					_size = x._size;
 					_capacity = x._capacity;
 					_ptr = _allocator.allocate(_capacity);
@@ -154,7 +154,119 @@ namespace ft
 
 				// Modifiers
 
+				template <class InputIterator>
+					void	assign (InputIterator first, InputIterator last,
+							typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type* t = 0)
+					{
+						(void)t;
+						size_type n = last - first;
+						if (n > _capacity)
+						{
+							_allocator.deallocate(_ptr, _capacity);
+							_capacity = n;
+							_ptr = _allocator.allocate(_capacity);
+						}
+						_size = n;
+						for (size_type i = 0; i < _size; i++)
+							_ptr[i] = *(first++);
+					}
 
+				void		assign (size_type n, const value_type& val)
+				{
+					if (n > _capacity)
+					{
+						_allocator.deallocate(_ptr, _capacity);
+						_capacity = n;
+						_ptr = _allocator.allocate(_capacity);
+					}
+					_size = n;
+					for (size_type i = 0; i < _size; i++)
+						_ptr[i] = val;
+				}
+
+				void push_back (const value_type& val)
+				{
+					if (_capacity == 0)
+					{
+						_ptr = _allocator.allocate(1);
+						_capacity = 1;
+					}
+					else if (_size == _capacity)
+					{
+						pointer tmp = _allocator.allocate(_capacity * 2);
+						for (size_type i = 0; i < _size; i++)
+							tmp[i] = _ptr[i];
+						_allocator.deallocate(_ptr, _capacity);
+						_ptr = tmp;
+						_capacity *= 2;
+					}
+					_ptr[_size] = val;
+					_size++;
+				}
+				void pop_back()
+				{
+					_ptr[_size] = 0;
+					_size--;
+				}
+
+				iterator insert (iterator position, const value_type& val)
+				{
+					if (_capacity > _size)
+					{
+						iterator it = end();
+						for (; it != position; it--)
+						{
+							*it = *(it-1);
+						}
+						*it = val;
+					}
+					else
+					{
+						pointer tmp = _allocator.allocate(_capacity * 2);
+						size_type i = 0;
+						for (iterator it = begin(); it < position; it++)
+							tmp[i++] = *it;
+						tmp[i++] = val;
+						for (iterator it = position+1; it < end(); it++)
+							tmp[i++] = *it;
+						_allocator.deallocate(_ptr, _capacity);
+						_ptr = tmp;
+						_capacity *= 2;
+					}
+					_size++;
+					return (position);
+				}
+				void insert (iterator position, size_type n, const value_type& val)
+				{
+					if (_capacity >= _size + n)
+					{
+						iterator it = end();
+						for (; it >= position; it--)
+						{
+							*(it+n) = *it;
+						}
+						for(size_type i = 0; i < n; i++)
+							*(++it) = val;
+					}
+					else
+					{
+						size_type new_cap = _capacity;
+						while (new_cap < _size + n) new_cap *= 2;
+						pointer tmp = _allocator.allocate(new_cap);
+						size_type i = 0;
+						iterator it = begin();
+						for (; it < position; it++) tmp[i++] = *it;
+						for (size_type j = 0; j < n; j++) tmp[i++] = val;
+						for (; it < end(); it++) tmp[i++] = *it;
+						_allocator.deallocate(_ptr, _capacity);
+						_ptr = tmp;
+						_capacity = new_cap;
+					}
+					_size += n;
+				}
+				template <class InputIterator>
+					void insert (iterator position, InputIterator first, InputIterator last,
+						typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type* t = 0);
 
 			private:
 				allocator_type	_allocator;
