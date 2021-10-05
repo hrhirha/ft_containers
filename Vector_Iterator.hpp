@@ -50,7 +50,7 @@ namespace ft
 			bool			operator >=(Iterator const &x) const { return _ptr >= x._ptr; };
 			bool			operator <=(Iterator const &x) const { return _ptr <= x._ptr; };
 
-			T				&operator [](size_t n) { return *this + n; };
+			T				&operator [](size_t n) { return (*this + n)._ptr[n]; };
 
 			Iterator(pointer p) : _ptr(p) {};
 
