@@ -1,10 +1,11 @@
-#ifndef VECTOR_HPP
-# define VECTOR_HPP
+#ifndef Vector_HPP
+# define Vector_HPP
 # include <iostream>
 # include "Vector_Iterator.hpp"
 # include "Iterator_Traits.hpp"
 # include "Reverse_Iterator.hpp"
 # include "types_traits.hpp"
+# include "Algorithm.hpp"
 # include <cmath>
 
 namespace ft
@@ -356,18 +357,18 @@ namespace ft
 
 				// Non-members
 
-				template <class T, class Alloc>
-					friend bool operator	==(const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-				template <class T, class Alloc>
-					friend bool operator	!=(const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-				template <class T, class Alloc>
-					friend bool operator	<(const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-				template <class T, class Alloc>
-					friend bool operator	<=(const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-				template <class T, class Alloc>
-					friend bool operator	>(const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-				template <class T, class Alloc>
-					friend bool operator	>=(const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
+				template <class U, class Allocator>
+					friend bool operator	==(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
+				template <class U, class Allocator>
+					friend bool operator	!=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
+				template <class U, class Allocator>
+					friend bool operator	<(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
+				template <class U, class Allocator>
+					friend bool operator	<=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
+				template <class U, class Allocator>
+					friend bool operator	>(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
+				template <class U, class Allocator>
+					friend bool operator	>=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
 
 			private:
 				allocator_type	_allocator;
@@ -375,6 +376,37 @@ namespace ft
 				size_type		_size;
 				size_type		_capacity;
 		};
+
+		template <class U, class Allocator>
+			bool operator	==(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs)
+			{
+				return (ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
+			}
+		template <class U, class Allocator>
+			bool operator	!=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs)
+			{
+				return !(lhs == rhs);
+			}
+		template <class U, class Allocator>
+			bool operator	<(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs)
+			{
+				return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
+			}
+		template <class U, class Allocator>
+			bool operator	<=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs)
+			{
+				return !(rhs < lhs);
+			}
+		template <class U, class Allocator>
+			bool operator	>(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs)
+			{
+				return rhs < lhs;
+			}
+		template <class U, class Allocator>
+			bool operator	>=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs)
+			{
+				return !(lhs < rhs);
+			}
 }
 
 #endif
