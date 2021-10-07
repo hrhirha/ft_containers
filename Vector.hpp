@@ -13,7 +13,8 @@ namespace ft
 	template <class T, class Alloc = std::allocator<T> >
 		class Vector
 		{
-			public:				typedef T												value_type;
+			public:
+				typedef T												value_type;
 				typedef Alloc											allocator_type;
 				typedef size_t											size_type;
 				typedef typename allocator_type::reference				reference;
@@ -37,6 +38,7 @@ namespace ft
 					if (_capacity)
 					{
 						_ptr = _allocator.allocate(_capacity);
+						if (!_ptr) throw std::bad_alloc();
 						for (size_type i = 0; i < _size; i++)
 							_ptr[i] = val;
 					}
@@ -52,6 +54,7 @@ namespace ft
 						_capacity = last - first;
 						_size = _capacity;
 						_ptr = _allocator.allocate(_capacity);
+						if (!_ptr) throw std::bad_alloc();
 						for (size_type i = 0; i < _size; i++)
 							_ptr[i] = *(first++);
 					}
@@ -66,6 +69,7 @@ namespace ft
 					_size = x._size;
 					_capacity = x._capacity;
 					_ptr = _allocator.allocate(_capacity);
+					if (!_ptr) throw std::bad_alloc();
 					for (size_type i = 0; i < _size; i++)
 						_ptr[i] = x._ptr[i];
 					return *this;
@@ -94,17 +98,17 @@ namespace ft
 				size_type size() const { return _size; }
 				size_type max_size() const
 				{
-					size_type ret = pow(2, 64 - sizeof(T)) * sizeof(T);
-					return (ret - 1);
+					return (_allocator.max_size());
 				}
 
 				void resize (size_type n, value_type val = value_type())
 				{
+					if (n > max_size()) throw std::length_error("max_size exceeded");
 					if (n == _size) return ;
 					if (n < _size)
 					{
 						for (size_type i = n; i < _size; i++)
-							_ptr[i] = 0;
+							_ptr[i] = *end();
 						_size = n;
 					}
 					else
@@ -124,8 +128,9 @@ namespace ft
 				{
 					if (n > _capacity)
 					{
-						size_type new_cap = n >= _capacity*2 ? n : _capacity * 2;
+						size_type new_cap = n;
 						pointer tmp = _allocator.allocate(new_cap);
+						if (!tmp) throw std::bad_alloc();
 						for (size_type i = 0; i < _size; i++)
 							tmp[i] = _ptr[i];
 						_allocator.deallocate(_ptr, _capacity);
@@ -169,6 +174,7 @@ namespace ft
 							_allocator.deallocate(_ptr, _capacity);
 							_capacity = n;
 							_ptr = _allocator.allocate(_capacity);
+							if (!_ptr) throw std::bad_alloc();
 						}
 						_size = n;
 						for (size_type i = 0; i < _size; i++)
@@ -182,6 +188,7 @@ namespace ft
 						_allocator.deallocate(_ptr, _capacity);
 						_capacity = n;
 						_ptr = _allocator.allocate(_capacity);
+						if (!_ptr) throw std::bad_alloc();
 					}
 					_size = n;
 					for (size_type i = 0; i < _size; i++)
@@ -193,11 +200,13 @@ namespace ft
 					if (_capacity == 0)
 					{
 						_ptr = _allocator.allocate(1);
+						if (!_ptr) throw std::bad_alloc();
 						_capacity = 1;
 					}
 					else if (_size == _capacity)
 					{
 						pointer tmp = _allocator.allocate(_capacity * 2);
+						if (!tmp) throw std::bad_alloc();
 						for (size_type i = 0; i < _size; i++)
 							tmp[i] = _ptr[i];
 						_allocator.deallocate(_ptr, _capacity);
@@ -209,64 +218,75 @@ namespace ft
 				}
 				void pop_back()
 				{
-					_ptr[_size] = 0;
+					_ptr[_size] = *end();
 					_size--;
 				}
 
 				iterator insert (iterator position, const value_type& val)
 				{
+					iterator ret;
 					if (_capacity > _size)
 					{
 						iterator it = end();
-						for (; it != position; it--)
-						{
-							*it = *(it-1);
-						}
+						for (; it > position; it--) *it = *(it-1);
 						*it = val;
+						ret = it;
+						_size++;
 					}
-					else
+					else if (_capacity)
 					{
 						pointer tmp = _allocator.allocate(_capacity * 2);
-						size_type i = 0;
-						for (iterator it = begin(); it < position; it++)
-							tmp[i++] = *it;
-						tmp[i++] = val;
-						for (iterator it = position+1; it < end(); it++)
-							tmp[i++] = *it;
+						if (!tmp) throw std::bad_alloc();
+						iterator it = begin();
+						iterator tmp_it = Iterator<value_type>(tmp);
+						for (; it < position; it++) *(tmp_it++) = *it;
+						*tmp_it = val;
+						ret = tmp_it++;
+						for (; it < end(); it++) *(tmp_it++) = *it;
 						_allocator.deallocate(_ptr, _capacity);
 						_ptr = tmp;
 						_capacity *= 2;
+						_size++;
 					}
-					_size++;
-					return (position);
+					else
+					{
+						push_back(val);
+						ret = begin();
+					}
+					return (ret);
 				}
 				void insert (iterator position, size_type n, const value_type& val)
 				{
 					if (_capacity >= _size + n)
 					{
 						iterator it = end();
-						for (; it >= position; it--)
-						{
-							*(it+n) = *it;
-						}
-						for(size_type i = 0; i < n; i++)
-							*(++it) = val;
+						for (; it >= position; it--) *(it+n) = *it;
+						for(size_type i = 0; i < n; i++) *(++it) = val;
+						_size += n;
 					}
-					else
+					else if (_capacity)
 					{
-						size_type new_cap = _capacity;
+						size_type new_cap = _size + n < _capacity*2 ? _capacity*2 : _size+n;
 						while (new_cap < _size + n) new_cap *= 2;
 						pointer tmp = _allocator.allocate(new_cap);
-						size_type i = 0;
+						if (!tmp) throw std::bad_alloc();
 						iterator it = begin();
-						for (; it < position; it++) tmp[i++] = *it;
-						for (size_type j = 0; j < n; j++) tmp[i++] = val;
-						for (; it < end(); it++) tmp[i++] = *it;
+						iterator tmp_it = Iterator<value_type>(tmp);
+						for (; it < position; it++) *(tmp_it++) = *it;
+						for (size_type j = 0; j < n; j++) *(tmp_it++) = val;
+						for (; it < end(); it++) *(tmp_it++) = *it;
 						_allocator.deallocate(_ptr, _capacity);
 						_ptr = tmp;
 						_capacity = new_cap;
+						_size += n;
 					}
-					_size += n;
+					else
+					{
+						_ptr = _allocator.allocate(n);
+						for (size_type i = 0; i < n; i++) _ptr[i] = val;
+						_capacity = n;
+						_size = n;
+					}
 				}
 				template <class InputIterator>
 					void insert (iterator position, InputIterator first, InputIterator last,
@@ -277,45 +297,51 @@ namespace ft
 						if (_capacity >= _size + n)
 						{
 							iterator it = end();
-							for (; it >= position; it--)
-							{
-								*(it+n) = *it;
-							}
-							for(; first != last; first++)
-								*(++it) = *first;
+							for (; it >= position; it--) *(it+n) = *it;
+							for(InputIterator tmp_it = first; tmp_it != last; tmp_it++) *(++it) = *tmp_it;
+							_size += n;
 						}
-						else
+						else if (_capacity)
 						{
-							size_type new_cap = _capacity;
+							size_type new_cap = _size + n < _capacity*2 ? _capacity*2 : _size+n;
 							while (new_cap < _size + n) new_cap *= 2;
 							pointer tmp = _allocator.allocate(new_cap);
+							if (!tmp) throw std::bad_alloc();
 							size_type i = 0;
 							iterator it = begin();
 							for (; it < position; it++) tmp[i++] = *it;
-							for (; first != last; first++) tmp[i++] = *first;
+							for (InputIterator tmp_it = first; tmp_it != last; tmp_it++) tmp[i++] = *tmp_it;
 							for (; it < end(); it++) tmp[i++] = *it;
 							_allocator.deallocate(_ptr, _capacity);
 							_ptr = tmp;
 							_capacity = new_cap;
+							_size += n;
 						}
-						_size += n;
+						else
+						{
+							_ptr = _allocator.allocate(n);
+							size_type i = 0;
+							for (InputIterator tmp_it = first; tmp_it != last; tmp_it++) _ptr[i++] = *tmp_it;
+							_capacity = n;
+							_size = n;
+						}
 					}
 
 				iterator erase (iterator position)
 				{
-					iterator it = begin();
-					for (; it != position; it++) ;
-					*it = 0;
+					iterator it = position;
+					//for (; it != position; it++) ;
+					(*it).~T();
 					for (; it != end()-1; it++) *it = *(it + 1);
 					_size--;
 					return position;
 				}
 				iterator erase (iterator first, iterator last)
 				{
-					iterator it = begin();
+					iterator it = first;
 					size_type n = last - first;
-					for (; it != first; it++) ;
-					for (; it != last; it++) *it = 0;
+					//for (; it != first; it++) ;
+					for (; it >= last; it++) (*it).~T();
 					for (; it != end(); it++) *(it - n) = *it;
 					_size -= n;
 					return first;
@@ -348,6 +374,10 @@ namespace ft
 
 				void clear()
 				{
+					for (size_type i = 0; i < _size; i++)
+					{
+						_ptr[i].~T();
+					}
 					_size = 0;
 				}
 
