@@ -20,15 +20,17 @@ namespace ft
 			typedef typename std::iterator<std::random_access_iterator_tag, T>::iterator_category
 				iterator_category;
 
-			Iterator();
-			Iterator(Iterator const &x) { *this = x; };
-			operator Iterator<const T>() const {return *this;}
-			Iterator		&operator =(Iterator const &x) { _ptr = &(*x._ptr); return *this; };
+			Iterator() {}
+			Iterator(pointer p) : _ptr(p) {};
+			Iterator(Iterator const &x) { *this = x; }
+			Iterator		&operator =(Iterator const &x) { _ptr = &(*x._ptr); return *this; }
 
-			~Iterator() {};
+			~Iterator() {}
+			
+			operator Iterator<const T>() const {return Iterator<const T>(_ptr);}
 
-			reference		operator *() { return (*_ptr); };
-			pointer			operator ->() { return &(*_ptr); };
+			reference		operator *() const { return (*_ptr); };
+			pointer			operator ->() const { return &(*_ptr); };
 
 			Iterator		&operator ++() { ++_ptr; return *this; };
 			Iterator		operator ++(int) { Iterator tmp = *this; ++(*this); return (tmp); };
@@ -50,9 +52,7 @@ namespace ft
 			bool			operator >=(Iterator const &x) const { return _ptr >= x._ptr; };
 			bool			operator <=(Iterator const &x) const { return _ptr <= x._ptr; };
 
-			T				&operator [](size_t n) { return (*this + n)._ptr[n]; };
-
-			Iterator(pointer p) : _ptr(p) {};
+			T				&operator [](size_t n) const { return (*this + n)._ptr[n]; };
 
 		private:
 			pointer	_ptr;
