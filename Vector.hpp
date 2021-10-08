@@ -259,9 +259,13 @@ namespace ft
 				{
 					if (_capacity >= _size + n)
 					{
-						iterator it = end();
-						for (; it >= position; it--) *(it+n) = *it;
-						for(size_type i = 0; i < n; i++) *(++it) = val;
+						iterator s_it = position+n <= end() ? end() : position+n;
+						iterator e_it = position+n > end() ? end() : position+n;
+						for (; s_it >= position; s_it--)
+						{
+							if (s_it < e_it) *(s_it+n) = *s_it;
+							*s_it = val;
+						}
 						_size += n;
 					}
 					else if (_capacity)
@@ -377,7 +381,6 @@ namespace ft
 					}
 					else
 					{
-						//Vector tmp = *this;
 						pointer tmp_ptr = _ptr;
 						allocator_type tmp_alloc = _allocator;
 						size_type tmp_size = _size;
@@ -423,6 +426,9 @@ namespace ft
 				template <class U, class Allocator>
 					friend bool operator	>=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
 
+				template <class U, class Allocator>
+					friend void swap (Vector<U,Allocator>& x, Vector<U,Allocator>& y);
+
 			private:
 				allocator_type	_allocator;
 				pointer			_ptr;
@@ -433,6 +439,8 @@ namespace ft
 		template <class U, class Allocator>
 			bool operator	==(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs)
 			{
+				if (lhs.size() != rhs.size())
+					return false;
 				return (ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
 			}
 		template <class U, class Allocator>
@@ -459,6 +467,12 @@ namespace ft
 			bool operator	>=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs)
 			{
 				return !(lhs < rhs);
+			}
+		
+		template <class U, class Allocator>
+			void swap (Vector<U,Allocator>& x, Vector<U,Allocator>& y)
+			{
+				x.swap(y);
 			}
 }
 
