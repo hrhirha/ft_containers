@@ -377,17 +377,21 @@ namespace ft
 					}
 					else
 					{
-						Vector tmp = *this;
-						(*this)._allocator.deallocate(_ptr, _capacity);
+						//Vector tmp = *this;
+						pointer tmp_ptr = _ptr;
+						allocator_type tmp_alloc = _allocator;
+						size_type tmp_size = _size;
+						size_type tmp_capacity = _capacity;
+
 						_allocator = x._allocator;
 						_ptr = x._ptr;
 						_size = x._size;
 						_capacity = x._capacity;
 
-						x._allocator = tmp._allocator;
-						x._ptr = tmp._ptr;
-						x._size = tmp._size;
-						x._capacity = tmp._capacity;
+						x._allocator = tmp_alloc;
+						x._ptr = tmp_ptr;
+						x._size = tmp_size;
+						x._capacity = tmp_capacity;
 					}
 				}
 
