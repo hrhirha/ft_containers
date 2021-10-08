@@ -330,19 +330,38 @@ namespace ft
 				iterator erase (iterator position)
 				{
 					iterator it = position;
-					//for (; it != position; it++) ;
+					iterator mid_it = begin() + _size/2;
+
 					(*it).~T();
-					for (; it != end()-1; it++) *it = *(it + 1);
+					if (it < mid_it)
+					{
+						for (; it != begin(); it--) *it = *(it - 1);
+						_ptr += 1;
+						_allocator.deallocate(_ptr-1, 1);
+					}
+					else
+					{
+						for (; it != end()-1; it++) *it = *(it + 1);
+					}
 					_size--;
 					return position;
 				}
 				iterator erase (iterator first, iterator last)
 				{
-					iterator it = first;
 					size_type n = last - first;
-					//for (; it != first; it++) ;
-					for (; it >= last; it++) (*it).~T();
-					for (; it != end(); it++) *(it - n) = *it;
+					if (last == end())
+					{
+						for (iterator it = first; it != last; it++) (*it).~T();
+					}
+					else
+					{
+						for (iterator it = first; it < end()-n; it++)
+						{
+							(*it).~T();
+							*it = *(it + n);
+						}
+					}
+
 					_size -= n;
 					return first;
 				}
