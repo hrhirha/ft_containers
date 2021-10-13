@@ -7,11 +7,11 @@ int	main()
 	//tree.insert(20);
 
 
-	for (size_t i = 1; i <= 10; i++)
+	for (size_t i = 1; i <= 100; i++)
 	{
 		tree.insert(i);
 	}
-	for (size_t i = 10; i >= 1; i--)
+	for (size_t i = 100; i >= 1; i--)
 	{
 		tree.erase(i);
 	}

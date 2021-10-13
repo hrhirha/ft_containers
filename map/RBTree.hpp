@@ -170,7 +170,7 @@ class RBTree
 		RBNode<T>	*_root;
 
 		// Rebalance Tree after Deletion
-		
+
 		void delete_rebalance(RBNode<T> *sib)
 		{
 			RBNode<T> *p = sib->parent;
@@ -274,60 +274,62 @@ class RBTree
 			}
 		}
 
-		// Get Successor
-
-		RBNode<T> *left_successor(RBNode<T> *n)
-		{
-			RBNode<T> *tmp = n->LCHILD;
-			while (tmp->RCHILD) tmp = tmp->RCHILD;
-			return tmp;
-		}
-
-		RBNode<T> *right_successor(RBNode<T> *n)
-		{
-			RBNode<T> *tmp = n->RCHILD;
-			while (tmp->LCHILD) tmp = tmp->LCHILD;
-			return tmp;
-		}
-
 		// Rebalance Tree after Insertion
-		
+
 		void	rebalance(RBNode<T> *n)
 		{
-			n = recolor(n);
-			if (!n || !n->parent || n->parent->col == BLACK) return ;
-			RBNode<T> *Gparent = n->parent->parent;
-			RBNode<T> *uncle = n->parent == Gparent->LCHILD ? Gparent->RCHILD : Gparent->LCHILD;
-			if (uncle == Gparent->RCHILD)
+			if (!n->parent) return ;
+			else if (!n->parent->parent)
 			{
-				if (n == n->parent->LCHILD)
-				{
-					std::swap(n->parent->col, Gparent->col);
-					right_rotate(n->parent, Gparent);
-					if (_root == Gparent) _root = n->parent;
-				}
-				else
-				{
-					left_rotate(n, n->parent);
-					std::swap(n->col, n->parent->col);
-					if (_root == n->parent) _root = n;
-					right_rotate(n, n->parent);
-				}
+				if (n->parent->col == RED)
+					n->parent->col = BLACK;
+				return ;
 			}
 			else
 			{
-				if (n == n->parent->RCHILD)
+				RBNode<T> *Gparent = n->parent->parent;
+				RBNode<T> *uncle = n->parent == Gparent->LCHILD ? Gparent->RCHILD : Gparent->LCHILD;
+				if (n->parent->col == BLACK) return ;
+				else if (uncle && uncle->col == RED)
 				{
-					std::swap(n->parent->col, Gparent->col);
-					left_rotate(n->parent, Gparent);
-					if (_root == Gparent) _root = n->parent;
+					std::cout << "RECOLOR\n";
+					n->parent->col = BLACK;
+					uncle->col = BLACK;
+					if (Gparent->parent) Gparent->col = RED;
+					rebalance(Gparent);
+					std::cout << "GP: " << Gparent->elem << "\n";
+				}
+				else if (uncle == Gparent->RCHILD)
+				{
+					if (n == n->parent->LCHILD)
+					{
+						std::swap(n->parent->col, Gparent->col);
+						right_rotate(n->parent, Gparent);
+						if (_root == Gparent) _root = n->parent;
+					}
+					else
+					{
+						left_rotate(n, n->parent);
+						std::swap(n->col, n->parent->col);
+						if (_root == n->parent) _root = n;
+						right_rotate(n, n->parent);
+					}
 				}
 				else
 				{
-					right_rotate(n, n->parent);
-					if (_root == n->parent) _root = n;
-					std::swap(n->col, n->parent->col);
-					left_rotate(n, n->parent);
+					if (n == n->parent->RCHILD)
+					{
+						std::swap(n->parent->col, Gparent->col);
+						left_rotate(n->parent, Gparent);
+						if (_root == Gparent) _root = n->parent;
+					}
+					else
+					{
+						right_rotate(n, n->parent);
+						if (_root == n->parent) _root = n;
+						std::swap(n->col, n->parent->col);
+						left_rotate(n, n->parent);
+					}
 				}
 			}
 		}
@@ -361,36 +363,54 @@ class RBTree
 			y->parent = x;
 			std::cout << "RIGHT_ROTATE (" << x->elem << " <-> " << y->elem << ")\n";
 		}
+		
+		// Get Successor
 
-		// Recolor
-
-		RBNode<T>	*recolor(RBNode<T> *n)
+		RBNode<T> *left_successor(RBNode<T> *n)
 		{
-			if (!n->parent) return NULL;
-			else if (!n->parent->parent)
-			{
-				if (n->parent->col == RED)
-					n->parent->col = BLACK;
-				return NULL;
-			}
-			else
-			{
-				RBNode<T> *Gparent = n->parent->parent;
-				RBNode<T> *uncle = n->parent == Gparent->LCHILD ? Gparent->RCHILD : Gparent->LCHILD;
-				if (n->parent->col == BLACK) return NULL;
-				else if (uncle && uncle->col == RED)
-				{
-					std::cout << "RECOLOR\n";
-					n->parent->col = BLACK;
-					uncle->col = BLACK;
-					if (Gparent->parent) Gparent->col = RED;
-					recolor(Gparent);
-					return Gparent;
-				}
-				std::cout << "=======\n";
-			}
-			return n;
+			RBNode<T> *tmp = n->LCHILD;
+			while (tmp->RCHILD) tmp = tmp->RCHILD;
+			return tmp;
 		}
+
+		RBNode<T> *right_successor(RBNode<T> *n)
+		{
+			RBNode<T> *tmp = n->RCHILD;
+			while (tmp->LCHILD) tmp = tmp->LCHILD;
+			return tmp;
+		}
+
+		/*
+		   RBNode<T>	*recolor(RBNode<T> *n)
+		   {
+		// RECOLR
+		if (!n->parent) return NULL;
+		else if (!n->parent->parent)
+		{
+		if (n->parent->col == RED)
+		n->parent->col = BLACK;
+		return NULL;
+		}
+		else
+		{
+		RBNode<T> *Gparent = n->parent->parent;
+		RBNode<T> *uncle = n->parent == Gparent->LCHILD ? Gparent->RCHILD : Gparent->LCHILD;
+		if (n->parent->col == BLACK) return NULL;
+		else if (uncle && uncle->col == RED)
+		{
+		std::cout << "RECOLOR\n";
+		n->parent->col = BLACK;
+		uncle->col = BLACK;
+		if (Gparent->parent) Gparent->col = RED;
+		recolor(Gparent);
+		std::cout << "GP: " << Gparent->elem << "\n";
+		return Gparent;
+		}
+		std::cout << "=======\n";
+		}
+		return n;
+		// ENDRECOLOR
+		}*/
 };
 
 #endif
