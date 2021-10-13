@@ -7,12 +7,14 @@ int	main()
 	//tree.insert(20);
 
 
-	for (size_t i = 1; i <= 100; i++)
+	for (size_t i = 1; i <= 10; i++)
 	{
 		tree.insert(i);
 	}
-	for (size_t i = 100; i >= 1; i--)
+	for (size_t i = 1; i <= 10; i++)
 	{
+		if (i == 5) continue ;
 		tree.erase(i);
 	}
+	tree.insert(9);
 }
