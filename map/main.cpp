@@ -1,20 +1,21 @@
 #include "RBTree.hpp"
+#include "../tools/Utility.hpp"
+#include <map>
 
 int	main()
 {
-	RBTree<int> tree;
+	RBTree<ft::pair<int,int> > tree;
+	//std::map<int, int> tree;
 
-	//tree.insert(20);
 
 
 	for (size_t i = 1; i <= 10; i++)
 	{
-		tree.insert(i);
+		tree.insert(ft::make_pair(i,i));
 	}
 	for (size_t i = 1; i <= 10; i++)
 	{
-		if (i == 5) continue ;
-		tree.erase(i);
+		tree.erase(ft::make_pair(i,i));
 	}
-	tree.insert(9);
+	while (1) {}
 }
