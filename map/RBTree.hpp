@@ -1,6 +1,7 @@
 #ifndef RBTREE_H
 # define RBTREE_H
 # include <iostream>
+# include <algorithm>
 
 # define BLACK 0
 # define RED 1
@@ -20,9 +21,6 @@ struct RBNode
 template <class T>
 class RBTree
 {
-	private:
-		RBNode<T>	*_root;
-
 	public:
 		RBTree() : _root(NULL) {}
 		RBTree(RBTree const &x) { *this = x; }
@@ -35,7 +33,7 @@ class RBTree
 		~RBTree() {}
 
 		// insertion
-		
+
 		RBNode<T> *insert(const T &new_elem)
 		{
 			RBNode<T> *new_node = new RBNode<T>();
@@ -51,7 +49,10 @@ class RBTree
 				_root->col = BLACK;
 				return _root;
 			}
-			std::cout << "_root = " << _root->elem << " " << _root->col << '\n';
+			std::cout << "\n new_elem = " << new_node->elem << " ("
+				<< (new_node->col == BLACK ? "BLACK" : "\033[31mRED\033[0m") << ")\n";
+			std::cout << "_root = " << _root->elem << " ("
+				<< (_root->col == BLACK ? "BLACK" : "\033[31mRED\033[0m") << ")\n";
 			RBNode<T> *ins_node = insert_node(_root, new_node);
 			if (!ins_node) delete new_node;
 			return ins_node;
@@ -61,13 +62,14 @@ class RBTree
 		{
 			if (new_node->elem < node->elem)
 			{
-				std::cout << "LEFT\n";
-				std::cout << "new_elem = " << new_node->elem << '\n';
-				std::cout << "old_elem = " << node->elem << " " << node->col << "\n\n";
+				std::cout << "LEFT: " << node->elem << " ("
+					<< (node->col == BLACK ? "BLACK" : "\033[31mRED\033[0m") << ")\n";
 				if (!node->LCHILD)
 				{
 					node->LCHILD = new_node;
 					new_node->parent = node;
+					std::cout << "/: " << new_node->elem << " ("
+						<< (new_node->col == BLACK ? "BLACK" : "\033[31mRED\033[0m") << ")\n";
 					rebalance(new_node);
 				}
 				else
@@ -77,13 +79,14 @@ class RBTree
 			}
 			else if (new_node->elem > node->elem)
 			{
-				std::cout << "RIGHT\n";
-				std::cout << "new_elem = " << new_node->elem << '\n';
-				std::cout << "old_elem = " << node->elem << " " << node->col << "\n\n";
+				std::cout << "RIGHT: " << node->elem << " ("
+					<< (node->col == BLACK ? "BLACK" : "\033[31mRED\033[0m") << ")\n";
 				if (!node->RCHILD)
 				{
 					node->RCHILD = new_node;
 					new_node->parent = node;
+					std::cout << "\\: " << new_node->elem << " ("
+						<< (new_node->col == BLACK ? "BLACK" : "\033[31mRED\033[0m") << ")\n";
 					rebalance(new_node);
 				}
 				else
@@ -96,8 +99,199 @@ class RBTree
 			return new_node;
 		}
 
-		// Rebalance
+		// Deletion
 
+		void	erase(const T &elem)
+		{
+			RBNode<T> *tmp = _root;
+
+			std::cout << "\nErasing " << elem << "\n";
+			while (tmp)
+			{
+				if (elem < tmp->elem)
+				{
+					tmp = tmp->LCHILD;
+				}
+				else if (elem > tmp->elem)
+				{
+					tmp = tmp->RCHILD;
+				}
+				else
+				{
+					erase_node(tmp);
+					break ;
+				}
+			}
+		}
+
+		void	erase_node(RBNode<T> *n)
+		{
+			RBNode<T> *p = n->parent;
+			if (n->LCHILD)
+			{
+				RBNode<T> *lmr = left_successor(n);
+				std::swap(n->elem, lmr->elem);
+				erase_node(lmr);
+			}
+			else if (n->RCHILD)
+			{
+				RBNode<T> *rml = right_successor(n);
+				std::swap(n->elem, rml->elem);
+				erase_node(rml);
+			}
+			else
+			{
+				if (n == _root)
+				{
+					std::cout << "erasing _root " << _root->elem << "\n";
+					delete n;
+					_root = NULL;
+				}
+				else if (n->col == RED)
+				{
+					std::cout << "erasing a red leaf\n";
+					if (n == p->LCHILD) p->LCHILD = NULL;
+					else p->RCHILD = NULL;
+					delete n;
+				}
+				else
+				{
+					std::cout << "erasing a block node\n";
+					RBNode<T> *sib = n == p->LCHILD ? p->RCHILD : p->LCHILD;
+					if (n == p->LCHILD) p->LCHILD = NULL;
+					else p->RCHILD = NULL;
+					delete n;
+					delete_rebalance(sib);
+				}
+			}
+		}
+
+	private:
+		RBNode<T>	*_root;
+
+		// Rebalance Tree after Deletion
+		
+		void delete_rebalance(RBNode<T> *sib)
+		{
+			RBNode<T> *p = sib->parent;
+			RBNode<T> *lneph = sib->LCHILD;
+			RBNode<T> *rneph = sib->RCHILD;
+			if (sib->col == BLACK)
+			{
+				std::cout << "sibling " << sib->elem  << " is black\n";
+				if (sib == p->RCHILD && (rneph && rneph->col == RED))
+				{
+					std::cout << "sib is RCHILD with RED right child" << "\n";
+					left_rotate(sib, p);
+					if (_root == p) _root = sib;
+					if (p->col == RED)
+					{
+						p->col = BLACK;
+						rneph->col = BLACK;
+						sib->col = RED;
+					}
+					else
+						rneph->col = BLACK;
+				}
+				else if (sib == p->LCHILD && (lneph && lneph->col == RED))
+				{
+					std::cout << "sib is LCHILD with RED left child" << "\n";
+					right_rotate(sib, p);
+					if (_root == p) _root = sib;
+					if (p->col == RED)
+					{
+						p->col = BLACK;
+						lneph->col = BLACK;
+						sib->col = RED;
+					}
+					else
+						lneph->col = BLACK;
+				}
+				else if (sib == p->RCHILD && (lneph && lneph->col == RED))
+				{
+					std::cout << "sib is RCHILD with RED left child" << "\n";
+					right_rotate(lneph, sib);
+					if (_root == p) _root = lneph;
+					left_rotate(lneph, p);
+					if (p->col == RED)
+					{
+						p->col = BLACK;
+						lneph->col = BLACK;
+						sib->col = RED;
+					}
+					else
+						lneph->col = BLACK;
+				}
+				else if (sib == p->LCHILD && (rneph && rneph->col == RED))
+				{
+					std::cout << "sib is LCHILD with RED right child" << "\n";
+					left_rotate(rneph, sib);
+					if (_root == p) _root = rneph;
+					right_rotate(rneph, p);
+					if (p->col == RED)
+					{
+						p->col = BLACK;
+						rneph->col = BLACK;
+						sib->col = RED;
+					}
+					else
+						rneph->col = BLACK;
+				}
+				else
+				{
+					std::cout << "sib has no RED child" << "\n";
+					sib->col = RED;
+					if (p->col == RED) p->col = BLACK;
+					else
+					{
+						if (p == _root) return ;
+						else
+						{
+							RBNode<T> *gp = p->parent;
+							RBNode<T> *s = s == gp->LCHILD ? gp->RCHILD : gp->LCHILD;
+							delete_rebalance(s);
+						}
+					}
+				}
+			}
+			else
+			{
+				std::cout << "sib is RED" << "\n";
+				if (sib == p->LCHILD)
+				{
+					right_rotate(sib, p);
+					if (_root == p) _root = sib;
+					std::swap(sib->col, p->col);
+					delete_rebalance(p->LCHILD);
+				}
+				else
+				{
+					left_rotate(sib, p);
+					if (_root == p) _root = sib;
+					std::swap(sib->col, p->col);
+					delete_rebalance(p->RCHILD);
+				}
+			}
+		}
+
+		// Get Successor
+
+		RBNode<T> *left_successor(RBNode<T> *n)
+		{
+			RBNode<T> *tmp = n->LCHILD;
+			while (tmp->RCHILD) tmp = tmp->RCHILD;
+			return tmp;
+		}
+
+		RBNode<T> *right_successor(RBNode<T> *n)
+		{
+			RBNode<T> *tmp = n->RCHILD;
+			while (tmp->LCHILD) tmp = tmp->LCHILD;
+			return tmp;
+		}
+
+		// Rebalance Tree after Insertion
+		
 		void	rebalance(RBNode<T> *n)
 		{
 			n = recolor(n);
@@ -116,8 +310,8 @@ class RBTree
 				{
 					left_rotate(n, n->parent);
 					std::swap(n->col, n->parent->col);
-					right_rotate(n, n->parent);
 					if (_root == n->parent) _root = n;
+					right_rotate(n, n->parent);
 				}
 			}
 			else
@@ -131,9 +325,9 @@ class RBTree
 				else
 				{
 					right_rotate(n, n->parent);
+					if (_root == n->parent) _root = n;
 					std::swap(n->col, n->parent->col);
 					left_rotate(n, n->parent);
-					if (_root == n->parent) _root = n;
 				}
 			}
 		}
@@ -150,6 +344,8 @@ class RBTree
 			}
 			y->RCHILD = x->LCHILD;
 			x->LCHILD = y;
+			y->parent = x;
+			std::cout << "LEFT_ROTATE (" << x->elem << " <-> " << y->elem << ")\n";
 		}
 
 		void	right_rotate(RBNode<T> *x, RBNode<T> *y)
@@ -162,6 +358,8 @@ class RBTree
 			}
 			y->LCHILD = x->RCHILD;
 			x->RCHILD = y;
+			y->parent = x;
+			std::cout << "RIGHT_ROTATE (" << x->elem << " <-> " << y->elem << ")\n";
 		}
 
 		// Recolor
@@ -182,12 +380,14 @@ class RBTree
 				if (n->parent->col == BLACK) return NULL;
 				else if (uncle && uncle->col == RED)
 				{
+					std::cout << "RECOLOR\n";
 					n->parent->col = BLACK;
 					uncle->col = BLACK;
 					if (Gparent->parent) Gparent->col = RED;
 					recolor(Gparent);
 					return Gparent;
 				}
+				std::cout << "=======\n";
 			}
 			return n;
 		}

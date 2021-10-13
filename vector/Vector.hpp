@@ -270,7 +270,7 @@ namespace ft
 					else if (_capacity)
 					{
 						size_type new_cap = _size + n < _capacity*2 ? _capacity*2 : _size+n;
-						while (new_cap < _size + n) new_cap *= 2;
+						//while (new_cap < _size + n) new_cap *= 2;
 						pointer tmp = _allocator.allocate(new_cap);
 						if (!tmp) throw std::bad_alloc();
 						iterator it = begin();
