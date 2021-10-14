@@ -2,6 +2,7 @@
 # define RBTREE_H
 # include <iostream>
 # include <algorithm>
+# include "../tools/Utility.hpp"
 
 # define BLACK 0
 # define RED 1
@@ -9,17 +10,18 @@
 # define LCHILD child[0]
 # define RCHILD child[1]
 
-template <class T>
+template <class T1, class T2>
 struct RBNode
 {
-	RBNode	*parent;
-	RBNode	*child[2];
-	T		elem;
-	int		col;
+	RBNode					*parent;
+	RBNode					*child[2];
+	ft::pair<const T1, T2>	*elem;
+	int						col;
 };
 
-template <class T>
-class RBTree
+template <class T1, class T2, class Compare = std::less<T1>,
+		 class Alloc = std::allocator<ft::pair<const T1, T2> > >
+		 class RBTree
 {
 	public:
 		RBTree() : _root(NULL) {}
@@ -27,21 +29,26 @@ class RBTree
 		RBTree &operator =(RBTree &x)
 		{
 			_root = x._root;
+			_alloc_elem = x._alloc_elem;
+			_comp = x._comp;
 			return *this;
 		}
 
 		~RBTree() {}
 
+		RBNode<T1, T2> *getRoot() const { return _root; }
+
 		// insertion
 
-		RBNode<T> *insert(const T &new_elem)
+		RBNode<T1, T2> *insert(const ft::pair<const T1, T2> &new_elem)
 		{
-			RBNode<T> *new_node = new RBNode<T>();
+			RBNode<T1, T2> *new_node = _alloc.allocate(1);
 			if (!new_node) throw std::bad_alloc();
 			new_node->parent = NULL;
 			new_node->LCHILD = NULL;
 			new_node->RCHILD = NULL;
-			new_node->elem = new_elem;
+			new_node->elem = _alloc_elem.allocate(1);
+			_alloc_elem.construct(new_node->elem, new_elem);
 			new_node->col = RED;
 			if (!_root)
 			{
@@ -49,14 +56,18 @@ class RBTree
 				_root->col = BLACK;
 				return _root;
 			}
-			RBNode<T> *ins_node = insert_node(_root, new_node);
-			if (!ins_node) delete new_node;
+			RBNode<T1, T2> *ins_node = insert_node(_root, new_node);
+			if (!ins_node)
+			{
+				_alloc_elem.deallocate(new_node->elem, 1);
+				_alloc.deallocate(new_node, 1);
+			}
 			return ins_node;
 		}
 
-		RBNode<T> *insert_node(RBNode<T> *node, RBNode<T> *new_node)
+		RBNode<T1, T2> *insert_node(RBNode<T1, T2> *node, RBNode<T1, T2> *new_node)
 		{
-			if (new_node->elem < node->elem)
+			if (_comp(new_node->elem->first, node->elem->first))
 			{
 				if (!node->LCHILD)
 				{
@@ -69,7 +80,7 @@ class RBTree
 					insert_node(node->LCHILD, new_node);
 				}
 			}
-			else if (new_node->elem > node->elem)
+			else if (!_comp(new_node->elem->first, node->elem->first))
 			{
 				if (!node->RCHILD)
 				{
@@ -89,17 +100,17 @@ class RBTree
 
 		// Deletion
 
-		void	erase(const T &elem)
+		void	erase(const T2 &elem)
 		{
-			RBNode<T> *tmp = _root;
+			RBNode<T1, T2> *tmp = _root;
 
 			while (tmp)
 			{
-				if (elem < tmp->elem)
+				if (_comp(elem, tmp->elem->first))
 				{
 					tmp = tmp->LCHILD;
 				}
-				else if (elem > tmp->elem)
+				else if (!_comp(elem, tmp->elem->first))
 				{
 					tmp = tmp->RCHILD;
 				}
@@ -111,71 +122,60 @@ class RBTree
 			}
 		}
 
-		void	erase_node(RBNode<T> *n)
+		void	erase_node(RBNode<T1, T2> *n)
 		{
-			RBNode<T> *p = n->parent;
+			RBNode<T1, T2> *p = n->parent;
 			if (n->LCHILD)
 			{
-				RBNode<T> *lmr = left_successor(n);
-				std::swap(n->elem, lmr->elem);
+				RBNode<T1, T2> *lmr = left_successor(n);
+				std::swap(n->elem->first, lmr->elem->first);
+				std::swap(n->elem->second, lmr->elem->second);
 				erase_node(lmr);
 			}
 			else if (n->RCHILD)
 			{
-				RBNode<T> *rml = right_successor(n);
-				std::swap(n->elem, rml->elem);
+				RBNode<T1, T2> *rml = right_successor(n);
+				std::swap(n->elem->first, rml->elem->first);
+				std::swap(n->elem->second, rml->elem->second);
 				erase_node(rml);
 			}
 			else
 			{
 				if (n == _root)
 				{
-					delete n;
+					_alloc.deallocate(n, 1);
 					_root = NULL;
 				}
 				else if (n->col == RED)
 				{
 					if (n == p->LCHILD) p->LCHILD = NULL;
 					else p->RCHILD = NULL;
-					delete n;
+					_alloc.deallocate(n, 1);
 				}
 				else
 				{
-					RBNode<T> *sib = n == p->LCHILD ? p->RCHILD : p->LCHILD;
+					RBNode<T1, T2> *sib = n == p->LCHILD ? p->RCHILD : p->LCHILD;
 					if (n == p->LCHILD) p->LCHILD = NULL;
 					else p->RCHILD = NULL;
-					delete n;
+					_alloc.deallocate(n, 1);
 					delete_rebalance(sib);
 				}
 			}
 		}
 
-		// Get Successor
-
-		RBNode<T> *left_successor(RBNode<T> *n)
-		{
-			RBNode<T> *tmp = n->LCHILD;
-			while (tmp->RCHILD) tmp = tmp->RCHILD;
-			return tmp;
-		}
-
-		RBNode<T> *right_successor(RBNode<T> *n)
-		{
-			RBNode<T> *tmp = n->RCHILD;
-			while (tmp->LCHILD) tmp = tmp->LCHILD;
-			return tmp;
-		}
-
 	private:
-		RBNode<T>	*_root;
+		RBNode<T1, T2>					*_root;
+		std::allocator<RBNode<T1, T2> >	_alloc;
+		Alloc							_alloc_elem;
+		Compare							_comp;
 
 		// Rebalance Tree after Deletion
 
-		void delete_rebalance(RBNode<T> *sib)
+		void delete_rebalance(RBNode<T1, T2> *sib)
 		{
-			RBNode<T> *p = sib->parent;
-			RBNode<T> *lneph = sib->LCHILD;
-			RBNode<T> *rneph = sib->RCHILD;
+			RBNode<T1, T2> *p = sib->parent;
+			RBNode<T1, T2> *lneph = sib->LCHILD;
+			RBNode<T1, T2> *rneph = sib->RCHILD;
 			if (sib->col == BLACK)
 			{
 				if (sib == p->RCHILD && (rneph && rneph->col == RED))
@@ -241,8 +241,8 @@ class RBTree
 						if (p == _root) return ;
 						else
 						{
-							RBNode<T> *gp = p->parent;
-							RBNode<T> *s = p == gp->LCHILD ? gp->RCHILD : gp->LCHILD;
+							RBNode<T1, T2> *gp = p->parent;
+							RBNode<T1, T2> *s = p == gp->LCHILD ? gp->RCHILD : gp->LCHILD;
 							delete_rebalance(s);
 						}
 					}
@@ -269,7 +269,7 @@ class RBTree
 
 		// Rebalance Tree after Insertion
 
-		void	rebalance(RBNode<T> *n)
+		void	rebalance(RBNode<T1, T2> *n)
 		{
 			if (!n->parent) return ;
 			else if (!n->parent->parent)
@@ -280,8 +280,8 @@ class RBTree
 			}
 			else
 			{
-				RBNode<T> *Gparent = n->parent->parent;
-				RBNode<T> *uncle = n->parent == Gparent->LCHILD ? Gparent->RCHILD : Gparent->LCHILD;
+				RBNode<T1, T2> *Gparent = n->parent->parent;
+				RBNode<T1, T2> *uncle = n->parent == Gparent->LCHILD ? Gparent->RCHILD : Gparent->LCHILD;
 				if (n->parent->col == BLACK) return ;
 				else if (uncle && uncle->col == RED)
 				{
@@ -324,36 +324,56 @@ class RBTree
 				}
 			}
 		}
-
-		// Rotate
-
-		void	left_rotate(RBNode<T> *x, RBNode<T> *y)
-		{
-			x->parent = y->parent;
-			if (x->parent)
-			{
-				if (y == y->parent->LCHILD) y->parent->LCHILD = x;
-				else y->parent->RCHILD = x;
-			}
-			y->RCHILD = x->LCHILD;
-			x->LCHILD = y;
-			if (y->RCHILD) y->RCHILD->parent = y;
-			y->parent = x;
-		}
-
-		void	right_rotate(RBNode<T> *x, RBNode<T> *y)
-		{
-			x->parent = y->parent;
-			if (x->parent)
-			{
-				if (y == y->parent->LCHILD) y->parent->LCHILD = x;
-				else y->parent->RCHILD = x;
-			}
-			y->LCHILD = x->RCHILD;
-			x->RCHILD = y;
-			if (y->LCHILD) y->LCHILD->parent = y;
-			y->parent = x;
-		}
 };
+
+// Get Successor
+
+template <class T1, class T2>
+RBNode<T1, T2> *left_successor(RBNode<T1, T2> *n)
+{
+	RBNode<T1, T2> *tmp = n->LCHILD;
+	while (tmp->RCHILD) tmp = tmp->RCHILD;
+	return tmp;
+}
+
+template <class T1, class T2>
+RBNode<T1, T2> *right_successor(RBNode<T1, T2> *n)
+{
+	RBNode<T1, T2> *tmp = n->RCHILD;
+	while (tmp->LCHILD) tmp = tmp->LCHILD;
+	return tmp;
+}
+
+// Rotate
+
+template <class T1, class T2>
+void	left_rotate(RBNode<T1, T2> *x, RBNode<T1, T2> *y)
+{
+	x->parent = y->parent;
+	if (x->parent)
+	{
+		if (y == y->parent->LCHILD) y->parent->LCHILD = x;
+		else y->parent->RCHILD = x;
+	}
+	y->RCHILD = x->LCHILD;
+	x->LCHILD = y;
+	if (y->RCHILD) y->RCHILD->parent = y;
+	y->parent = x;
+}
+
+template <class T1, class T2>
+void	right_rotate(RBNode<T1, T2> *x, RBNode<T1, T2> *y)
+{
+	x->parent = y->parent;
+	if (x->parent)
+	{
+		if (y == y->parent->LCHILD) y->parent->LCHILD = x;
+		else y->parent->RCHILD = x;
+	}
+	y->LCHILD = x->RCHILD;
+	x->RCHILD = y;
+	if (y->LCHILD) y->LCHILD->parent = y;
+	y->parent = x;
+}
 
 #endif
