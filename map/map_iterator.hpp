@@ -1,0 +1,77 @@
+#ifndef MAP_ITERATOR_HPP
+# define MAP_ITERATOR_HPP
+# include "RBTree.hpp"
+
+namespace ft
+{
+	template <class T>
+		class map_iterator : std::iterator<std::bidirectional_iterator_tag, T>
+	{
+		public:
+			typedef typename std::iterator<std::bidirectional_iterator_tag, T>::iterator_category
+				iterator_category;
+			typedef typename std::iterator<std::bidirectional_iterator_tag, T>::value_type
+				value_type;
+			typedef typename std::iterator<std::bidirectional_iterator_tag, T>::difference_type
+				difference_type;
+			typedef typename std::iterator<std::bidirectional_iterator_tag, T>::pointer
+				pointer;
+			typedef typename std::iterator<std::bidirectional_iterator_tag, T>::reference
+				reference;
+
+			map_iterator() : _root(nullptr) {}
+			map_iterator(const RBNode<T> *node) _root(node) {}
+			map_iterator(const map_iterator<T> &it) : _root(it._root) {}
+			map_iterator &operator =(const map_iterator<T> &it) { _root = it._root; return *this;}
+			~map_iterator() {}
+
+			bool		operator ==(const map_iterator<T> &it) const { return _root == it._root; }
+			bool		operator !=(const map_iterator<T> &it) const { return !(*this == it); }
+
+			reference	operator *() const { return _root->elem; }
+			reference	operator ->() const { return &(_root->elem); }
+
+			map_iterator	&operator ++()
+			{
+				if (!_root->parent && _root->RCHILD)
+					return map_iterator(right_successor(_root));
+				else if (_root = _root->parent->LCHILD && !_root->RCHILD)
+					return map_iterator(_root->parent);
+				else if (_root->RCHILD)
+					return map_iterator(right_successor(_root));
+				else
+				{
+					RBNode<T> *x = _root;
+					while (x->parent && x == x->parent->RCHILD)
+						x = x->parent;
+					return (map_iterator(x->parent));
+				}
+				return map_iterator(nullptr);
+			}
+			map_iterator	operator ++(int) { map_iterator tmp = *this; ++(*this); return tmp; }
+
+			map_iterator	&operator --()
+			{
+				if (!_root->parent && _root->LCHILD)
+					return map_iterator(left_successor(_root));
+				else if (_root = _root->parent->RCHILD && !_root->LCHILD)
+					return map_iterator(_root->parent);
+				else if (_root->LCHILD)
+					return map_iterator(left_successor(_root));
+				else
+				{
+					RBNode<T> *x = _root;
+					while (x->parent && x == x->parent->LCHILD)
+						x = x->parent;
+					return (map_iterator(x->parent));
+				}
+				return map_iterator(nullptr);
+			}
+			map_iterator	operator --(int) { map_iterator tmp = *this; --(*this); return tmp; }
+
+		private:
+			RBNode *_root;
+	}
+}
+
+#endif

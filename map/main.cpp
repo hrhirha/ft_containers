@@ -1,21 +1,15 @@
 #include "RBTree.hpp"
 #include "../tools/Utility.hpp"
 #include <map>
+#include <vector>
+#include "../vector/Vector.hpp"
 
 int	main()
 {
-	RBTree<ft::pair<int,int> > tree;
-	//std::map<int, int> tree;
+	ft::Vector<int> *v = new  ft::Vector<int>(10, 10);
 
+	delete v;
 
-
-	for (size_t i = 1; i <= 10; i++)
-	{
-		tree.insert(ft::make_pair(i,i));
-	}
-	for (size_t i = 1; i <= 10; i++)
-	{
-		tree.erase(ft::make_pair(i,i));
-	}
-	while (1) {}
+	std::cout << v->size() << "\n";
+	std::cout << v->size() << "\n";
 }

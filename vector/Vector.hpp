@@ -76,7 +76,15 @@ namespace ft
 
 				// Destructor
 
-				~Vector() {};
+				~Vector()
+				{
+					for (size_type i = 0; i < _size; i++)
+					{
+						_ptr[i].~T();
+						_ptr[i] = T();
+					}
+					_size = 0;
+				}
 
 				// Iterators
 

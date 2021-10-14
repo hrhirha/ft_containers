@@ -150,6 +150,22 @@ class RBTree
 			}
 		}
 
+		// Get Successor
+
+		RBNode<T> *left_successor(RBNode<T> *n)
+		{
+			RBNode<T> *tmp = n->LCHILD;
+			while (tmp->RCHILD) tmp = tmp->RCHILD;
+			return tmp;
+		}
+
+		RBNode<T> *right_successor(RBNode<T> *n)
+		{
+			RBNode<T> *tmp = n->RCHILD;
+			while (tmp->LCHILD) tmp = tmp->LCHILD;
+			return tmp;
+		}
+
 	private:
 		RBNode<T>	*_root;
 
@@ -337,22 +353,6 @@ class RBTree
 			x->RCHILD = y;
 			if (y->LCHILD) y->LCHILD->parent = y;
 			y->parent = x;
-		}
-		
-		// Get Successor
-
-		RBNode<T> *left_successor(RBNode<T> *n)
-		{
-			RBNode<T> *tmp = n->LCHILD;
-			while (tmp->RCHILD) tmp = tmp->RCHILD;
-			return tmp;
-		}
-
-		RBNode<T> *right_successor(RBNode<T> *n)
-		{
-			RBNode<T> *tmp = n->RCHILD;
-			while (tmp->LCHILD) tmp = tmp->LCHILD;
-			return tmp;
 		}
 };
 
