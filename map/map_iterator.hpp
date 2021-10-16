@@ -4,7 +4,7 @@
 
 namespace ft
 {
-	template <class T1, class T2>
+	template <class T1, class T2, class C, class A>
 		class map_iterator : std::iterator<std::bidirectional_iterator_tag, ft::pair<const T1,T2> >
 	{
 		public:
@@ -24,32 +24,41 @@ namespace ft
 				std::iterator<std::bidirectional_iterator_tag, ft::pair<const T1,T2> >::reference
 				reference;
 
-			map_iterator() : _root(NULL) {}
-			map_iterator(RBNode<T1,T2> *node) : _root(node) {}
-			map_iterator(const map_iterator<T1,T2> &it) : _root(it._root) {}
-			map_iterator &operator =(const map_iterator<T1,T2> &it) { _root = it._root; return *this;}
+			map_iterator() : _tree(), _node(NULL) {}
+			map_iterator(RBNode<T1,T2> *n, RBTree<T1,T2,C,A> t) : _tree(t), _node(n) {}
+			map_iterator(const map_iterator<T1,T2,C,A> &it) : _tree(it._tree), _node(it._node) {}
+			map_iterator &operator =(const map_iterator<T1,T2,C,A> &it) { _tree = it._tree; _node = it._node; return *this;}
 			~map_iterator() {}
 
-			bool		operator ==(const map_iterator<T1,T2> &it) const { return _root == it._root; }
-			bool		operator !=(const map_iterator<T1,T2> &it) const { return !(*this == it); }
+			bool		operator ==(const map_iterator<T1,T2,C,A> &it) const { return _node == it._node; }
+			bool		operator !=(const map_iterator<T1,T2,C,A> &it) const { return !(*this == it); }
 
-			reference	operator *() const { return *_root->elem; }
-			reference	operator ->() const { return &(*_root->elem); }
+			reference	operator *() const { return *_node->elem; }
+			pointer		operator ->() const { return _node->elem; }
+
+			RBNode<T1,T2> *getNode() const { return _node; }
 
 			map_iterator	&operator ++()
 			{
-				if (!_root->parent && _root->RCHILD)
-					_root = right_successor(_root);
-				else if (_root == _root->parent->LCHILD && !_root->RCHILD)
-					_root = _root->parent;
-				else if (_root->RCHILD)
-					_root = right_successor(_root);
+				if (_node == _tree.right_most())
+				{
+					_node = _tree.getEnd();
+				}
+				else if (!_node->parent)
+				{
+					if (!_node->RCHILD) _node = _node->parent;
+					else _node = right_successor(_node);
+				}
+				else if (_node == _node->parent->LCHILD && !_node->RCHILD)
+					_node = _node->parent;
+				else if (_node->RCHILD)
+					_node = right_successor(_node);
 				else
 				{
-					RBNode<T1,T2> *x = _root;
+					RBNode<T1,T2> *x = _node;
 					while (x->parent && x == x->parent->RCHILD)
 						x = x->parent;
-					_root = x->parent;
+					_node = x->parent;
 				}
 				return *this;
 			}
@@ -57,25 +66,33 @@ namespace ft
 
 			map_iterator	&operator --()
 			{
-				if (!_root->parent && _root->LCHILD)
-					_root = left_successor(_root);
-				else if (_root == _root->parent->RCHILD && !_root->LCHILD)
-					_root = _root->parent;
-				else if (_root->LCHILD)
-					_root = left_successor(_root);
+				if (_node == _tree.getEnd())
+				{
+					_node = _tree.right_most();
+				}
+				else if (!_node->parent)
+				{
+					if (!_node->LCHILD) _node = _node->parent;
+					else _node = left_successor(_node);
+				}
+				else if (_node == _node->parent->RCHILD && !_node->LCHILD)
+					_node = _node->parent;
+				else if (_node->LCHILD)
+					_node = left_successor(_node);
 				else
 				{
-					RBNode<T1,T2> *x = _root;
+					RBNode<T1,T2> *x = _node;
 					while (x->parent && x == x->parent->LCHILD)
 						x = x->parent;
-					_root = x->parent;
+					_node = x->parent;
 				}
 				return *this;
 			}
 			map_iterator	operator --(int) { map_iterator tmp = *this; --(*this); return tmp; }
 
 		private:
-			RBNode<T1,T2> *_root;
+			RBTree<T1,T2,C,A> _tree;
+			RBNode<T1,T2> *_node;
 	};
 }
 

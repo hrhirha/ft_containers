@@ -39,8 +39,14 @@ namespace ft
 				operator reverse_iterator<const Iterator>() const
 				{return reverse_iterator<const Iterator>(_base_iterator);}
 
-				reference			operator *() const { return *(_base_iterator - 1); };
-				pointer				operator ->() const { return &(*(_base_iterator - 1)); };
+				reference			operator *() const
+				{
+					iterator_type tmp = _base_iterator; return *--tmp;
+				}
+				pointer				operator ->() const
+				{
+					iterator_type tmp = _base_iterator; return &(*--tmp);
+				}
 
 				reverse_iterator	&operator ++()
 				{

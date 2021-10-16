@@ -19,16 +19,17 @@ struct RBNode
 	int						col;
 };
 
-template <class T1, class T2, class Compare = std::less<T1>,
-		 class Alloc = std::allocator<ft::pair<const T1, T2> > >
+template <class T1, class T2, class Compare,
+		 class Alloc >
 		 class RBTree
 {
 	public:
-		RBTree() : _root(NULL) {}
+		RBTree() : _root(NULL) { _end = _alloc.allocate(1); }
 		RBTree(RBTree const &x) { *this = x; }
-		RBTree &operator =(RBTree &x)
+		RBTree &operator =(const RBTree &x)
 		{
 			_root = x._root;
+			_end = x._end;
 			_alloc_elem = x._alloc_elem;
 			_comp = x._comp;
 			return *this;
@@ -36,11 +37,83 @@ template <class T1, class T2, class Compare = std::less<T1>,
 
 		~RBTree() {}
 
-		RBNode<T1, T2> *getRoot() const { return _root; }
+		RBNode<T1,T2> *getRoot() const { return _root; }
+		RBNode<T1,T2> *getEnd() const { return _end; }
+		RBNode<T1,T2> *right_most() const
+		{
+			RBNode<T1,T2> *tmp = _root;
+			if (!tmp) return _end;
+			while (tmp->RCHILD) tmp = tmp->RCHILD;
+			return tmp;
+		}
+		RBNode<T1,T2> *left_most() const
+		{
+			RBNode<T1,T2> *tmp = _root;
+			if (!tmp) return _end;
+			while (tmp->LCHILD) tmp = tmp->LCHILD;
+			return tmp;
+		}
+
+		RBNode<T1,T2> *find(const T1 &elem) const
+		{
+			RBNode<T1, T2> *tmp = _root;
+
+			while (tmp)
+			{
+				if (!_comp(elem, tmp->elem->first) && !_comp(tmp->elem->first, elem))
+					return tmp;
+				else if (_comp(elem, tmp->elem->first))
+					tmp = tmp->LCHILD;
+				else
+					tmp = tmp->RCHILD;
+			}
+			return NULL;
+		}
+
+		RBNode<T1,T2> *lower_bound (const T1 &k, RBNode<T1,T2> *n) const
+		{
+			RBNode<T1,T2> *ret = NULL;
+			if (!n) return NULL;
+			if (_comp(right_most()->elem->first, k))
+				return _end;
+			if (_comp(k, n->elem->first))
+			{
+				ret = lower_bound(k, n->LCHILD);
+				
+				if (!ret) ret = n;
+			}
+			else if (_comp(n->elem->first, k))
+			{
+				ret = lower_bound(k, n->RCHILD);
+				if (!ret) ret = n;
+			}
+			else
+				ret = n;
+			return ret;
+		}
+		
+		RBNode<T1,T2> *upper_bound (const T1 &k, RBNode<T1,T2> *n) const
+		{
+			RBNode<T1,T2> *ret = NULL;
+			if (!n) return NULL;
+			if (!_comp(k, right_most()->elem->first))
+				return _end;
+			if (_comp(k, n->elem->first))
+			{
+				ret = upper_bound(k, n->LCHILD);
+				if (!ret) ret = n;
+			}
+			else
+			{
+				ret = upper_bound(k, n->RCHILD);
+				if (!ret) ret = n;
+			}
+			return ret;
+		}
 
 		// insertion
 
-		RBNode<T1, T2> *insert(const ft::pair<const T1, T2> &new_elem)
+		ft::pair<RBNode<T1, T2>*, bool>	insert(const ft::pair<const T1, T2> &new_elem)
 		{
 			RBNode<T1, T2> *new_node = _alloc.allocate(1);
 			if (!new_node) throw std::bad_alloc();
@@ -54,15 +127,16 @@ template <class T1, class T2, class Compare = std::less<T1>,
 			{
 				_root = new_node;
 				_root->col = BLACK;
-				return _root;
+				return ft::make_pair(_root, true);
 			}
 			RBNode<T1, T2> *ins_node = insert_node(_root, new_node);
-			if (!ins_node)
+			if (ins_node != new_node)
 			{
 				_alloc_elem.deallocate(new_node->elem, 1);
 				_alloc.deallocate(new_node, 1);
+				return ft::make_pair(ins_node, false);
 			}
-			return ins_node;
+			return ft::make_pair(ins_node, true);
 		}
 
 		RBNode<T1, T2> *insert_node(RBNode<T1, T2> *node, RBNode<T1, T2> *new_node)
@@ -76,11 +150,9 @@ template <class T1, class T2, class Compare = std::less<T1>,
 					rebalance(new_node);
 				}
 				else
-				{
-					insert_node(node->LCHILD, new_node);
-				}
+					new_node = insert_node(node->LCHILD, new_node);
 			}
-			else if (!_comp(new_node->elem->first, node->elem->first))
+			else if (_comp(node->elem->first, new_node->elem->first))
 			{
 				if (!node->RCHILD)
 				{
@@ -89,55 +161,53 @@ template <class T1, class T2, class Compare = std::less<T1>,
 					rebalance(new_node);
 				}
 				else
-				{
-					insert_node(node->RCHILD, new_node);
-				}
+					new_node = insert_node(node->RCHILD, new_node);
 			}
 			else
-				return NULL;
+				return node;
 			return new_node;
 		}
 
 		// Deletion
 
-		void	erase(const T2 &elem)
+		size_t	erase(const T1 &elem)
 		{
 			RBNode<T1, T2> *tmp = _root;
 
 			while (tmp)
 			{
+				if (!_comp(elem, tmp->elem->first) && !_comp(tmp->elem->first, elem))
+				{
+					erase_node(tmp);
+					return 1;
+				}
 				if (_comp(elem, tmp->elem->first))
 				{
 					tmp = tmp->LCHILD;
 				}
-				else if (!_comp(elem, tmp->elem->first))
+				else
 				{
 					tmp = tmp->RCHILD;
 				}
-				else
-				{
-					erase_node(tmp);
-					break ;
-				}
 			}
+			return 0;
 		}
 
-		void	erase_node(RBNode<T1, T2> *n)
+		size_t	erase_node(RBNode<T1, T2> *n)
 		{
+			size_t ret = 0;
 			RBNode<T1, T2> *p = n->parent;
 			if (n->LCHILD)
 			{
 				RBNode<T1, T2> *lmr = left_successor(n);
-				std::swap(n->elem->first, lmr->elem->first);
-				std::swap(n->elem->second, lmr->elem->second);
-				erase_node(lmr);
+				_alloc_elem.construct(n->elem, *lmr->elem);
+				ret = erase_node(lmr);
 			}
 			else if (n->RCHILD)
 			{
 				RBNode<T1, T2> *rml = right_successor(n);
-				std::swap(n->elem->first, rml->elem->first);
-				std::swap(n->elem->second, rml->elem->second);
-				erase_node(rml);
+				_alloc_elem.construct(n->elem, *rml->elem);
+				ret = erase_node(rml);
 			}
 			else
 			{
@@ -150,6 +220,7 @@ template <class T1, class T2, class Compare = std::less<T1>,
 				{
 					if (n == p->LCHILD) p->LCHILD = NULL;
 					else p->RCHILD = NULL;
+					_alloc_elem.deallocate(n->elem, 1);
 					_alloc.deallocate(n, 1);
 				}
 				else
@@ -157,14 +228,18 @@ template <class T1, class T2, class Compare = std::less<T1>,
 					RBNode<T1, T2> *sib = n == p->LCHILD ? p->RCHILD : p->LCHILD;
 					if (n == p->LCHILD) p->LCHILD = NULL;
 					else p->RCHILD = NULL;
+					_alloc_elem.deallocate(n->elem, 1);
 					_alloc.deallocate(n, 1);
 					delete_rebalance(sib);
 				}
+				return 1;
 			}
+			return ret;
 		}
 
 	private:
 		RBNode<T1, T2>					*_root;
+		RBNode<T1, T2>					*_end;
 		std::allocator<RBNode<T1, T2> >	_alloc;
 		Alloc							_alloc_elem;
 		Compare							_comp;
