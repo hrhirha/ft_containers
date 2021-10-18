@@ -4,45 +4,47 @@
 
 namespace ft
 {
-	template <class T1, class T2, class C, class A>
-		class map_iterator : std::iterator<std::bidirectional_iterator_tag, ft::pair<const T1,T2> >
+	template <class Node, class Tree, class P>
+		class map_iterator : std::iterator<std::bidirectional_iterator_tag, P>
 	{
 		public:
 			typedef typename
-				std::iterator<std::bidirectional_iterator_tag, ft::pair<const T1,T2> >::iterator_category
+				std::iterator<std::bidirectional_iterator_tag, P>::iterator_category
 				iterator_category;
 			typedef typename
-				std::iterator<std::bidirectional_iterator_tag, ft::pair<const T1,T2> >::value_type
+				std::iterator<std::bidirectional_iterator_tag, P>::value_type
 				value_type;
 			typedef typename
-				std::iterator<std::bidirectional_iterator_tag, ft::pair<const T1,T2> >::difference_type
+				std::iterator<std::bidirectional_iterator_tag, P>::difference_type
 				difference_type;
 			typedef typename
-				std::iterator<std::bidirectional_iterator_tag, ft::pair<const T1,T2> >::pointer
+				std::iterator<std::bidirectional_iterator_tag, P>::pointer
 				pointer;
 			typedef typename
-				std::iterator<std::bidirectional_iterator_tag, ft::pair<const T1,T2> >::reference
+				std::iterator<std::bidirectional_iterator_tag, P>::reference
 				reference;
 
-			map_iterator() : _tree(), _node(NULL) {}
-			map_iterator(RBNode<T1,T2> *n, RBTree<T1,T2,C,A> t) : _tree(t), _node(n) {}
-			map_iterator(const map_iterator<T1,T2,C,A> &it) : _tree(it._tree), _node(it._node) {}
-			map_iterator &operator =(const map_iterator<T1,T2,C,A> &it) { _tree = it._tree; _node = it._node; return *this;}
+			map_iterator() : _tree(NULL), _node(NULL) {}
+			map_iterator(Node *n, Tree *t) : _tree(t), _node(n) {}
+			map_iterator(const map_iterator &it) { *this = it; }
+			map_iterator &operator =(const map_iterator &it) { _tree = it._tree; _node = it._node; return *this;}
 			~map_iterator() {}
 
-			bool		operator ==(const map_iterator<T1,T2,C,A> &it) const { return _node == it._node; }
-			bool		operator !=(const map_iterator<T1,T2,C,A> &it) const { return !(*this == it); }
+			operator map_iterator<Node,Tree,const P>() const { return map_iterator<Node,Tree,const P>(_node, _tree); }
+
+			bool		operator ==(const map_iterator &it) const { return _node == it._node; }
+			bool		operator !=(const map_iterator &it) const { return !(*this == it); }
 
 			reference	operator *() const { return *_node->elem; }
 			pointer		operator ->() const { return _node->elem; }
 
-			RBNode<T1,T2> *getNode() const { return _node; }
+			Node *getNode() const { return _node; }
 
 			map_iterator	&operator ++()
 			{
-				if (_node == _tree.right_most())
+				if (_node == _tree->right_most())
 				{
-					_node = _tree.getEnd();
+					_node = _tree->getEnd();
 				}
 				else if (!_node->parent)
 				{
@@ -55,7 +57,7 @@ namespace ft
 					_node = right_successor(_node);
 				else
 				{
-					RBNode<T1,T2> *x = _node;
+					Node *x = _node;
 					while (x->parent && x == x->parent->RCHILD)
 						x = x->parent;
 					_node = x->parent;
@@ -66,9 +68,9 @@ namespace ft
 
 			map_iterator	&operator --()
 			{
-				if (_node == _tree.getEnd())
+				if (_node == _tree->getEnd())
 				{
-					_node = _tree.right_most();
+					_node = _tree->right_most();
 				}
 				else if (!_node->parent)
 				{
@@ -81,7 +83,7 @@ namespace ft
 					_node = left_successor(_node);
 				else
 				{
-					RBNode<T1,T2> *x = _node;
+					Node *x = _node;
 					while (x->parent && x == x->parent->LCHILD)
 						x = x->parent;
 					_node = x->parent;
@@ -91,8 +93,8 @@ namespace ft
 			map_iterator	operator --(int) { map_iterator tmp = *this; --(*this); return tmp; }
 
 		private:
-			RBTree<T1,T2,C,A> _tree;
-			RBNode<T1,T2> *_node;
+			Tree *_tree;
+			Node *_node;
 	};
 }
 

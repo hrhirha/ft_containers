@@ -23,7 +23,7 @@ namespace ft
 			Iterator() {}
 			Iterator(pointer p) : _ptr(p) {};
 			Iterator(Iterator const &x) { *this = x; }
-			Iterator		&operator =(Iterator const &x) { _ptr = &(*x._ptr); return *this; }
+			Iterator		&operator =(Iterator const &x) { _ptr = x._ptr; return *this; }
 
 			~Iterator() {}
 			
