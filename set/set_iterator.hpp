@@ -1,58 +1,53 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   map_iterator.hpp                                   :+:      :+:    :+:   */
+/*   set_iterator.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/18 18:03:26 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/10/18 18:03:27 by hrhirha          ###   ########.fr       */
+/*   Created: 2021/10/18 18:06:40 by hrhirha           #+#    #+#             */
+/*   Updated: 2021/10/18 18:06:43 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MAP_ITERATOR_HPP
-# define MAP_ITERATOR_HPP
+#ifndef SET_ITERATOR_HPP
+# define SET_ITERATOR_HPP
 # include "RBTree.hpp"
 
 namespace ft
 {
 	template <class Node, class Tree, class P>
-		class map_iterator : std::iterator<std::bidirectional_iterator_tag, P>
+		class set_iterator : std::iterator<std::bidirectional_iterator_tag, P>
 	{
 		public:
-			typedef typename
-				std::iterator<std::bidirectional_iterator_tag, P>::iterator_category
+			typedef typename std::iterator<std::bidirectional_iterator_tag, P>::iterator_category
 				iterator_category;
-			typedef typename
-				std::iterator<std::bidirectional_iterator_tag, P>::value_type
+			typedef typename std::iterator<std::bidirectional_iterator_tag, P>::value_type
 				value_type;
-			typedef typename
-				std::iterator<std::bidirectional_iterator_tag, P>::difference_type
+			typedef typename std::iterator<std::bidirectional_iterator_tag, P>::difference_type
 				difference_type;
-			typedef typename
-				std::iterator<std::bidirectional_iterator_tag, P>::pointer
+			typedef typename std::iterator<std::bidirectional_iterator_tag, const P>::pointer
 				pointer;
-			typedef typename
-				std::iterator<std::bidirectional_iterator_tag, P>::reference
+			typedef typename std::iterator<std::bidirectional_iterator_tag, const P>::reference
 				reference;
 
-			map_iterator() : _tree(NULL), _node(NULL) {}
-			map_iterator(Node *n, Tree *t) : _tree(t), _node(n) {}
-			map_iterator(const map_iterator &it) { *this = it; }
-			map_iterator &operator =(const map_iterator &it) { _tree = it._tree; _node = it._node; return *this;}
-			~map_iterator() {}
+			set_iterator() : _tree(NULL), _node(NULL) {}
+			set_iterator(Node *n, Tree *t) : _tree(t), _node(n) {}
+			set_iterator(const set_iterator &it) { *this = it; }
+			set_iterator &operator =(const set_iterator &it) { _tree = it._tree; _node = it._node; return *this;}
+			~set_iterator() {}
 
-			operator map_iterator<Node,Tree,const P>() const { return map_iterator<Node,Tree,const P>(_node, _tree); }
+			operator set_iterator<Node,Tree,const P>() const { return set_iterator<Node,Tree,const P>(_node, _tree); }
 
-			bool		operator ==(const map_iterator &it) const { return _node == it._node; }
-			bool		operator !=(const map_iterator &it) const { return !(*this == it); }
+			bool		operator ==(const set_iterator &it) const { return _node == it._node; }
+			bool		operator !=(const set_iterator &it) const { return !(*this == it); }
 
 			reference	operator *() const { return *_node->elem; }
 			pointer		operator ->() const { return _node->elem; }
 
 			Node *getNode() const { return _node; }
 
-			map_iterator	&operator ++()
+			set_iterator	&operator ++()
 			{
 				if (_node == _tree->right_most())
 				{
@@ -76,9 +71,9 @@ namespace ft
 				}
 				return *this;
 			}
-			map_iterator	operator ++(int) { map_iterator tmp = *this; ++(*this); return tmp; }
+			set_iterator	operator ++(int) { set_iterator tmp = *this; ++(*this); return tmp; }
 
-			map_iterator	&operator --()
+			set_iterator	&operator --()
 			{
 				if (_node == _tree->getEnd())
 				{
@@ -102,7 +97,7 @@ namespace ft
 				}
 				return *this;
 			}
-			map_iterator	operator --(int) { map_iterator tmp = *this; --(*this); return tmp; }
+			set_iterator	operator --(int) { set_iterator tmp = *this; --(*this); return tmp; }
 
 		private:
 			Tree *_tree;

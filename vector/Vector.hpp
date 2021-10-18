@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Vector.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/10/18 18:08:20 by hrhirha           #+#    #+#             */
+/*   Updated: 2021/10/18 18:13:01 by hrhirha          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef Vector_HPP
 # define Vector_HPP
 # include <iostream>
@@ -278,7 +290,6 @@ namespace ft
 					else if (_capacity)
 					{
 						size_type new_cap = _size + n < _capacity*2 ? _capacity*2 : _size+n;
-						//while (new_cap < _size + n) new_cap *= 2;
 						pointer tmp = _allocator.allocate(new_cap);
 						if (!tmp) throw std::bad_alloc();
 						iterator it = begin();
@@ -418,24 +429,6 @@ namespace ft
 
 				allocator_type get_allocator() const { return _allocator; }
 
-				// Non-members
-
-				template <class U, class Allocator>
-					friend bool operator	==(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
-				template <class U, class Allocator>
-					friend bool operator	!=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
-				template <class U, class Allocator>
-					friend bool operator	<(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
-				template <class U, class Allocator>
-					friend bool operator	<=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
-				template <class U, class Allocator>
-					friend bool operator	>(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
-				template <class U, class Allocator>
-					friend bool operator	>=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs);
-
-				template <class U, class Allocator>
-					friend void swap (Vector<U,Allocator>& x, Vector<U,Allocator>& y);
-
 			private:
 				allocator_type	_allocator;
 				pointer			_ptr;
@@ -446,9 +439,7 @@ namespace ft
 		template <class U, class Allocator>
 			bool operator	==(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs)
 			{
-				if (lhs.size() != rhs.size())
-					return false;
-				return (ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
+				return lhs.size() == rhs.size() && (ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
 			}
 		template <class U, class Allocator>
 			bool operator	!=(const Vector<U,Allocator>& lhs, const Vector<U,Allocator>& rhs)

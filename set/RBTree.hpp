@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/18 18:03:16 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/10/18 18:03:19 by hrhirha          ###   ########.fr       */
+/*   Created: 2021/10/18 18:03:45 by hrhirha           #+#    #+#             */
+/*   Updated: 2021/10/18 18:06:54 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ namespace ft
 			int		col;
 		};
 
-	template <class K, class T, class Compare, class Alloc >
+	template <class T, class Compare, class Alloc >
 		class RBTree
 		{
 			public:
@@ -68,15 +68,15 @@ namespace ft
 					return tmp;
 				}
 
-				RBNode<T> *find(const K &elem) const
+				RBNode<T> *find(const T &elem) const
 				{
 					RBNode<T> *tmp = _root;
 
 					while (tmp)
 					{
-						if (!_comp(elem, tmp->elem->first) && !_comp(tmp->elem->first, elem))
+						if (!_comp(elem, *tmp->elem) && !_comp(*tmp->elem, elem))
 							return tmp;
-						else if (_comp(elem, tmp->elem->first))
+						else if (_comp(elem, *tmp->elem))
 							tmp = tmp->LCHILD;
 						else
 							tmp = tmp->RCHILD;
@@ -84,22 +84,22 @@ namespace ft
 					return NULL;
 				}
 
-				RBNode<T> *lower_bound (const K &k, RBNode<T> *n) const
+				RBNode<T> *lower_bound (const T &k, RBNode<T> *n) const
 				{
 					RBNode<T> *ret = NULL;
 					if (!n) return NULL;
-					if (_comp(right_most()->elem->first, k))
+					if (_comp(*right_most()->elem, k))
 						return _end;
-					if (_comp(k, n->elem->first))
+					if (_comp(k, *n->elem))
 					{
 						ret = lower_bound(k, n->LCHILD);
 						if (!ret) ret = n;
 					}
-					else if (_comp(n->elem->first, k))
+					else if (_comp(*n->elem, k))
 					{
 						if (!n->RCHILD)
 						{
-							while (_comp(n->elem->first, k))
+							while (_comp(*n->elem, k))
 								n = n->parent;
 							return n;
 						}
@@ -110,13 +110,13 @@ namespace ft
 					return ret;
 				}
 
-				RBNode<T> *upper_bound (const K &k, RBNode<T> *n) const
+				RBNode<T> *upper_bound (const T &k, RBNode<T> *n) const
 				{
 					RBNode<T> *ret = NULL;
 					if (!n) return NULL;
-					if (!_comp(k, right_most()->elem->first))
+					if (!_comp(k, *right_most()->elem))
 						return _end;
-					if (_comp(k, n->elem->first))
+					if (_comp(k, *n->elem))
 					{
 						ret = upper_bound(k, n->LCHILD);
 						if (!ret) ret = n;
@@ -125,7 +125,7 @@ namespace ft
 					{
 						if (!n->RCHILD)
 						{
-							while (!_comp(k, n->elem->first))
+							while (!_comp(k, *n->elem))
 								n = n->parent;
 							return n;
 						}
@@ -164,7 +164,7 @@ namespace ft
 
 				RBNode<T> *insert_node(RBNode<T> *node, RBNode<T> *new_node)
 				{
-					if (_comp(new_node->elem->first, node->elem->first))
+					if (_comp(*new_node->elem, *node->elem))
 					{
 						if (!node->LCHILD)
 						{
@@ -175,7 +175,7 @@ namespace ft
 						else
 							new_node = insert_node(node->LCHILD, new_node);
 					}
-					else if (_comp(node->elem->first, new_node->elem->first))
+					else if (_comp(*node->elem, *new_node->elem))
 					{
 						if (!node->RCHILD)
 						{
@@ -193,18 +193,18 @@ namespace ft
 
 				// Deletion
 
-				size_t	erase(const K &elem)
+				size_t	erase(const T &elem)
 				{
 					RBNode<T> *tmp = _root;
 
 					while (tmp)
 					{
-						if (!_comp(elem, tmp->elem->first) && !_comp(tmp->elem->first, elem))
+						if (!_comp(elem, *tmp->elem) && !_comp(*tmp->elem, elem))
 						{
 							erase_node(tmp);
 							return 1;
 						}
-						if (_comp(elem, tmp->elem->first))
+						if (_comp(elem, *tmp->elem))
 						{
 							tmp = tmp->LCHILD;
 						}
@@ -264,8 +264,8 @@ namespace ft
 				RBNode<T>					*_root;
 				RBNode<T>					*_end;
 				std::allocator<RBNode<T> >	_alloc;
-				Alloc							_alloc_elem;
-				Compare							_comp;
+				Alloc						_alloc_elem;
+				Compare						_comp;
 
 				// Rebalance Tree after Deletion
 
