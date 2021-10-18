@@ -6,7 +6,7 @@
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:08:20 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/10/18 18:13:01 by hrhirha          ###   ########.fr       */
+/*   Updated: 2021/10/18 19:44:28 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,13 @@ namespace ft
 				typedef typename ft::Iterator<const value_type>			const_iterator;
 				typedef typename ft::reverse_iterator<iterator>			reverse_iterator;
 				typedef typename ft::reverse_iterator<const_iterator>	const_reverse_iterator;
+				typedef typename ft::Iterator_traits<iterator>::difference_type
+					difference_type;
 
 				// Constructors
 
 				explicit Vector(const allocator_type &alloc = allocator_type()) :
-					_allocator(alloc), _ptr(nullptr), _size(0), _capacity(0) {}
+					_allocator(alloc), _ptr(NULL), _size(0), _capacity(0) {}
 
 				explicit Vector(size_type n, const value_type &val = value_type(),
 						const allocator_type &alloc = allocator_type()) :
@@ -53,7 +55,7 @@ namespace ft
 						for (size_type i = 0; i < _size; i++)
 							_ptr[i] = val;
 					}
-					else _ptr = nullptr;
+					else _ptr = NULL;
 				}
 
 				template <class InputIter>
@@ -70,7 +72,7 @@ namespace ft
 							_ptr[i] = *(first++);
 					}
 
-				Vector(const Vector &x) : _ptr(nullptr), _size(0), _capacity(0)
+				Vector(const Vector &x) : _ptr(NULL), _size(0), _capacity(0)
 				{
 					*this = x;
 				}
@@ -91,10 +93,8 @@ namespace ft
 				~Vector()
 				{
 					for (size_type i = 0; i < _size; i++)
-					{
 						_ptr[i].~T();
-						_ptr[i] = T();
-					}
+					_allocator.deallocate(_ptr, _capacity);
 					_size = 0;
 				}
 
@@ -122,7 +122,7 @@ namespace ft
 
 				void resize (size_type n, value_type val = value_type())
 				{
-					if (n > max_size()) throw std::length_error("max_size exceeded");
+					if (n > max_size()) throw std::length_error("Vector");
 					if (n == _size) return ;
 					if (n < _size)
 					{
@@ -351,20 +351,10 @@ namespace ft
 
 				iterator erase (iterator position)
 				{
-					iterator it = position;
-					iterator mid_it = begin() + _size/2;
-
-					(*it).~T();
-					if (it < mid_it)
-					{
-						for (; it != begin(); it--) *it = *(it - 1);
-						_ptr += 1;
-						_allocator.deallocate(_ptr-1, 1);
-					}
-					else
-					{
-						for (; it != end()-1; it++) *it = *(it + 1);
-					}
+					difference_type dif = position - begin();
+					for (size_type i = dif ; i < _size-1; i++)
+						std::swap(_ptr[i], _ptr[i+1]);
+					_ptr[_size-1].~T();
 					_size--;
 					return position;
 				}
@@ -395,7 +385,7 @@ namespace ft
 						x._allocator.deallocate(x._ptr, x._capacity);
 						x._size = 0;
 						x._capacity = 0;
-						x._ptr = nullptr;
+						x._ptr = NULL;
 					}
 					else
 					{
