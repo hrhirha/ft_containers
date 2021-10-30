@@ -6,7 +6,7 @@
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:07:47 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/10/18 18:11:47 by hrhirha          ###   ########.fr       */
+/*   Updated: 2021/10/27 12:20:04 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,11 +53,13 @@ namespace ft
 
 				reference			operator *() const
 				{
-					iterator_type tmp = _base_iterator; return *--tmp;
+					iterator_type tmp = _base_iterator;
+					return *--tmp;
 				}
 				pointer				operator ->() const
 				{
-					iterator_type tmp = _base_iterator; return &(*--tmp);
+					iterator_type tmp = _base_iterator;
+					return &(*--tmp);
 				}
 
 				reverse_iterator	&operator ++()
@@ -66,7 +68,8 @@ namespace ft
 				}
 				reverse_iterator	operator ++(int)
 				{
-					reverse_iterator tmp = *this; ++(*this); return (tmp);
+					reverse_iterator tmp = *this; ++(*this);
+					return (tmp);
 				}
 
 				reverse_iterator	&operator --()

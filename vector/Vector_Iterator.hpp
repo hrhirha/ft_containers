@@ -6,7 +6,7 @@
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:08:31 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/10/18 18:08:32 by hrhirha          ###   ########.fr       */
+/*   Updated: 2021/10/29 21:53:39 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ namespace ft
 			
 			operator Iterator<const T>() const {return Iterator<const T>(_ptr);}
 
-			reference		operator *() const { return (*_ptr); };
+			reference		operator *() const { return *_ptr; };
 			pointer			operator ->() const { return &(*_ptr); };
 
 			Iterator		&operator ++() { ++_ptr; return *this; };
@@ -50,11 +50,11 @@ namespace ft
 			Iterator		&operator --() { --_ptr; return *this; };
 			Iterator		operator --(int) { Iterator tmp = *this; --(*this); return (tmp); };
 
-			Iterator		&operator +=(int n) { _ptr += n; return *this; };
-			Iterator		&operator -=(int n) { _ptr -= n; return *this; };
+			Iterator		&operator +=(difference_type n) { _ptr += n; return *this; };
+			Iterator		&operator -=(difference_type n) { _ptr -= n; return *this; };
 
-			Iterator		operator +(int n) const { return (Iterator(_ptr + n)); };
-			Iterator		operator -(int n) const { return (Iterator(_ptr - n)); };
+			Iterator		operator +(difference_type n) const { return (Iterator(_ptr + n)); };
+			Iterator		operator -(difference_type n) const { return (Iterator(_ptr - n)); };
 			difference_type	operator -(Iterator const &x) const { return (_ptr - x._ptr); };
 
 			bool			operator ==(Iterator const &x) const { return _ptr == x._ptr; };
@@ -64,7 +64,7 @@ namespace ft
 			bool			operator >=(Iterator const &x) const { return _ptr >= x._ptr; };
 			bool			operator <=(Iterator const &x) const { return _ptr <= x._ptr; };
 
-			T				&operator [](size_t n) const { return (*this + n)._ptr[n]; };
+			T				&operator [](difference_type n) const { return _ptr[n]; };
 
 		private:
 			pointer	_ptr;

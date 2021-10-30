@@ -6,7 +6,7 @@
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:03:45 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/10/18 18:06:54 by hrhirha          ###   ########.fr       */
+/*   Updated: 2021/10/30 18:25:42 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ namespace ft
 					return *this;
 				}
 
-				~RBTree() {}
+				~RBTree() { _alloc.deallocate(_end, 1); }
 
 				RBNode<T> *getRoot() const { return _root; }
 				RBNode<T> *getEnd() const { return _end; }
@@ -155,6 +155,7 @@ namespace ft
 					RBNode<T> *ins_node = insert_node(_root, new_node);
 					if (ins_node != new_node)
 					{
+						_alloc_elem.destroy(new_node->elem);
 						_alloc_elem.deallocate(new_node->elem, 1);
 						_alloc.deallocate(new_node, 1);
 						return ft::make_pair(ins_node, false);
@@ -236,6 +237,8 @@ namespace ft
 					{
 						if (n == _root)
 						{
+							_alloc_elem.destroy(n->elem);
+							_alloc_elem.deallocate(n->elem, 1);
 							_alloc.deallocate(n, 1);
 							_root = NULL;
 						}
@@ -243,6 +246,7 @@ namespace ft
 						{
 							if (n == p->LCHILD) p->LCHILD = NULL;
 							else p->RCHILD = NULL;
+							_alloc_elem.destroy(n->elem);
 							_alloc_elem.deallocate(n->elem, 1);
 							_alloc.deallocate(n, 1);
 						}
@@ -251,6 +255,7 @@ namespace ft
 							RBNode<T> *sib = n == p->LCHILD ? p->RCHILD : p->LCHILD;
 							if (n == p->LCHILD) p->LCHILD = NULL;
 							else p->RCHILD = NULL;
+							_alloc_elem.destroy(n->elem);
 							_alloc_elem.deallocate(n->elem, 1);
 							_alloc.deallocate(n, 1);
 							delete_rebalance(sib);
@@ -261,11 +266,11 @@ namespace ft
 				}
 
 			private:
-				RBNode<T>					*_root;
-				RBNode<T>					*_end;
-				std::allocator<RBNode<T> >	_alloc;
-				Alloc						_alloc_elem;
-				Compare						_comp;
+				RBNode<T>											*_root;
+				RBNode<T>											*_end;
+				typename Alloc::template rebind<RBNode<T> >::other	_alloc;
+				Alloc												_alloc_elem;
+				Compare												_comp;
 
 				// Rebalance Tree after Deletion
 

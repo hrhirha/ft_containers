@@ -1,3 +1,15 @@
+/* ************************************************************************************************ */
+/*                                                                                                  */
+/*                                                        :::   ::::::::   ::::::::  :::::::::::    */
+/*   Stack_tests.cpp                                   :+:+:  :+:    :+: :+:    :+: :+:     :+:     */
+/*                                                      +:+         +:+        +:+        +:+       */
+/*   By: mamoussa <mamoussa@student.1337.ma>           +#+      +#++:      +#++:        +#+         */
+/*                                                    +#+         +#+        +#+      +#+           */
+/*   Created: 2021/10/12 12:45:02 by mamoussa        #+#  #+#    #+# #+#    #+#     #+#             */
+/*   Updated: 2021/10/29 17:45:04 by hrhirha          ###   ########.fr       */
+/*                                                                                                  */
+/* ************************************************************************************************ */
+
 // you should include your path to this files
 #include "../stack/Stack.hpp"       // your stack path.
 #include "../vector/Vector.hpp" // your Vector path.
@@ -320,6 +332,9 @@ void alarm_handler(int seg)
 
 int main()
 {
+	std::cout << RED << "________________________________________________________________________________________________________" << std::endl;
+    std::cout << RED << "**** The test is taking so much time to test the all cases and the time complexity of each method ****" << std::endl;
+    std::cout << RED << "--------------------------------------------------------------------------------------------------------" << RESET << std::endl;
     signal(SIGALRM, alarm_handler);
 
     std::cout << YELLOW << "Testing Constructors;" << RESET << std::endl;
@@ -330,6 +345,6 @@ int main()
 
     std::cout << YELLOW << "Testing relational operators;" << RESET << std::endl;
     TEST_CASE(testRelationalOperators);
-
+	system("leaks stack.out");
 	return 0;
 }

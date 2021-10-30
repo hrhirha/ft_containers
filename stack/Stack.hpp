@@ -6,17 +6,18 @@
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:07:21 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/10/18 19:45:31 by hrhirha          ###   ########.fr       */
+/*   Updated: 2021/10/30 12:28:31 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef STACK_HPP
 # define STACK_HPP
 # include "../vector/Vector.hpp"
+#include <stdio.h>
 
 namespace ft
 {
-	template <class T, class Container = ft::Vector <T> >
+	template <class T, class Container = ft::vector<T> >
 		class stack
 		{
 			public :
@@ -24,15 +25,17 @@ namespace ft
 				typedef Container	container_type;
 				typedef size_t		size_type;
 
-				explicit stack (const container_type& ctnr = container_type()) :
-					c(ctnr) {}
+				explicit stack (const container_type& ctnr = container_type())
+					: c(ctnr) {}
 
-				bool empty() const { return c.empty(); }
-				size_type size() const { return c.size(); }
-				value_type& top() { return c.back(); }
-				const value_type& top() const { return c.back(); }
-				void push (const value_type& val) { c.push_back(val); }
-				void pop() { c.pop_back(); }
+				bool				empty() const { return c.empty(); }
+				size_type			size() const { return c.size(); }
+				value_type&			top() { return c.back(); }
+				const value_type&	top() const { return c.back(); }
+				void				push (const value_type& val) { 
+					c.push_back(val); 
+				}
+				void 				pop() { c.pop_back(); }
 
 
 				template <class U, class C>
@@ -49,7 +52,7 @@ namespace ft
 				friend bool operator>= (const stack<U,C>& lhs, const stack<U,C>& rhs);
 
 			protected :
-				Container c;
+				container_type c;
 		};
 
 	template <class U, class C>

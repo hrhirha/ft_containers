@@ -6,7 +6,7 @@
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:02:56 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/10/18 18:03:07 by hrhirha          ###   ########.fr       */
+/*   Updated: 2021/10/30 18:32:09 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,32 +49,47 @@ namespace ft
 
 			explicit map (const key_compare& comp = key_compare(),
               const allocator_type& alloc = allocator_type()) :
-				_tree(new rbtree), _alloc(alloc), _size(0), _comp(comp) { _root = _tree->getRoot(); }
+				_alloc(alloc), _size(0), _comp(comp)
+			{
+				_tree = _tree_alloc.allocate(1);
+				_tree_alloc.construct(_tree);
+				_root = _tree->getRoot();
+			}
 
 			template <class InputIterator>
 				map (InputIterator first, InputIterator last,
 					const key_compare& comp = key_compare(),
-					const allocator_type& alloc = allocator_type()) : _tree(new rbtree), _alloc(alloc), _comp(comp)
+					const allocator_type& alloc = allocator_type()) : _alloc(alloc), _comp(comp)
 			{
+				_tree = _tree_alloc.allocate(1);
+				_tree_alloc.construct(_tree);
 				_size = 0;
 				insert(first, last);
 				_root = _tree->getRoot();
 			}
 
-			map (const map& x) : _tree(new rbtree), _alloc(x._alloc), _comp(x._comp)
+			map (const map& x) : _tree_alloc(x._tree_alloc), _alloc(x._alloc), _comp(x._comp)
 			{
+				_tree = _tree_alloc.allocate(1);
+				_tree_alloc.construct(_tree);
 				*this = x;
 			}
 			map	&operator =(const map& x)
 			{
 				clear();
-				insert(x.begin(), x.end());
+				if (x._size)
+					insert(x.begin(), x.end());
 				return *this;
 			}
 
 			// Destructor
 
-			~map() { clear(); delete _tree; }
+			~map()
+			{
+				clear();
+				_tree_alloc.destroy(_tree);
+				_tree_alloc.deallocate(_tree,1);
+			}
 
 			// Iterators
 
@@ -160,7 +175,7 @@ namespace ft
 			}
 			void erase (iterator first, iterator last)
 			{
-				ft::Vector<key_type> v;
+				ft::vector<key_type> v;
 				for (; first != last; first++) v.push_back(first->first);
 				for (size_type i = 0; i < v.size(); i++)
 					erase(v[i]);
@@ -245,11 +260,12 @@ namespace ft
 			allocator_type get_allocator() const { return _alloc; }
 
 		private:
-			rbtree			*_tree;
-			node			*_root;
-			allocator_type	_alloc;
-			size_type		_size;
-			key_compare		_comp;
+			rbtree											*_tree;
+			node											*_root;
+			typename Alloc::template rebind<rbtree>::other	_tree_alloc;
+			allocator_type									_alloc;
+			size_type										_size;
+			key_compare										_comp;
 	};
 
 	// Relational operations
