@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   RBTree.hpp                                         :+:      :+:    :+:   */
+/*   setRBTree.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:03:45 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/10/30 18:25:42 by hrhirha          ###   ########.fr       */
+/*   Updated: 2021/11/01 14:52:16 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef RBTREE_H
-# define RBTREE_H
+#ifndef SETRBTREE_H
+# define SETRBTREE_H
 # include <iostream>
 # include <algorithm>
 # include "../tools/Utility.hpp"
@@ -26,21 +26,21 @@ namespace ft
 {
 
 	template <class T>
-		struct RBNode
+		struct setRBNode
 		{
-			RBNode	*parent;
-			RBNode	*child[2];
+			setRBNode	*parent;
+			setRBNode	*child[2];
 			T		*elem;
 			int		col;
 		};
 
 	template <class T, class Compare, class Alloc >
-		class RBTree
+		class setRBTree
 		{
 			public:
-				RBTree() : _root(NULL) { _end = _alloc.allocate(1); }
-				RBTree(RBTree const &x) { *this = x; }
-				RBTree &operator =(const RBTree &x)
+				setRBTree() : _root(NULL) { _end = _alloc.allocate(1); }
+				setRBTree(setRBTree const &x) { *this = x; }
+				setRBTree &operator =(const setRBTree &x)
 				{
 					_root = x._root;
 					_end = x._end;
@@ -49,28 +49,28 @@ namespace ft
 					return *this;
 				}
 
-				~RBTree() { _alloc.deallocate(_end, 1); }
+				~setRBTree() { _alloc.deallocate(_end, 1); }
 
-				RBNode<T> *getRoot() const { return _root; }
-				RBNode<T> *getEnd() const { return _end; }
-				RBNode<T> *right_most() const
+				setRBNode<T> *getRoot() const { return _root; }
+				setRBNode<T> *getEnd() const { return _end; }
+				setRBNode<T> *right_most() const
 				{
-					RBNode<T> *tmp = _root;
+					setRBNode<T> *tmp = _root;
 					if (!tmp) return _end;
 					while (tmp->RCHILD) tmp = tmp->RCHILD;
 					return tmp;
 				}
-				RBNode<T> *left_most() const
+				setRBNode<T> *left_most() const
 				{
-					RBNode<T> *tmp = _root;
+					setRBNode<T> *tmp = _root;
 					if (!tmp) return _end;
 					while (tmp->LCHILD) tmp = tmp->LCHILD;
 					return tmp;
 				}
 
-				RBNode<T> *find(const T &elem) const
+				setRBNode<T> *find(const T &elem) const
 				{
-					RBNode<T> *tmp = _root;
+					setRBNode<T> *tmp = _root;
 
 					while (tmp)
 					{
@@ -84,9 +84,9 @@ namespace ft
 					return NULL;
 				}
 
-				RBNode<T> *lower_bound (const T &k, RBNode<T> *n) const
+				setRBNode<T> *lower_bound (const T &k, setRBNode<T> *n) const
 				{
-					RBNode<T> *ret = NULL;
+					setRBNode<T> *ret = NULL;
 					if (!n) return NULL;
 					if (_comp(*right_most()->elem, k))
 						return _end;
@@ -110,9 +110,9 @@ namespace ft
 					return ret;
 				}
 
-				RBNode<T> *upper_bound (const T &k, RBNode<T> *n) const
+				setRBNode<T> *upper_bound (const T &k, setRBNode<T> *n) const
 				{
-					RBNode<T> *ret = NULL;
+					setRBNode<T> *ret = NULL;
 					if (!n) return NULL;
 					if (!_comp(k, *right_most()->elem))
 						return _end;
@@ -136,9 +136,9 @@ namespace ft
 
 				// insertion
 
-				ft::pair<RBNode<T>*, bool>	insert(const T &new_elem)
+				ft::pair<setRBNode<T>*, bool>	insert(const T &new_elem)
 				{
-					RBNode<T> *new_node = _alloc.allocate(1);
+					setRBNode<T> *new_node = _alloc.allocate(1);
 					if (!new_node) throw std::bad_alloc();
 					new_node->parent = NULL;
 					new_node->LCHILD = NULL;
@@ -152,7 +152,7 @@ namespace ft
 						_root->col = BLACK;
 						return ft::make_pair(_root, true);
 					}
-					RBNode<T> *ins_node = insert_node(_root, new_node);
+					setRBNode<T> *ins_node = insert_node(_root, new_node);
 					if (ins_node != new_node)
 					{
 						_alloc_elem.destroy(new_node->elem);
@@ -163,7 +163,7 @@ namespace ft
 					return ft::make_pair(ins_node, true);
 				}
 
-				RBNode<T> *insert_node(RBNode<T> *node, RBNode<T> *new_node)
+				setRBNode<T> *insert_node(setRBNode<T> *node, setRBNode<T> *new_node)
 				{
 					if (_comp(*new_node->elem, *node->elem))
 					{
@@ -196,7 +196,7 @@ namespace ft
 
 				size_t	erase(const T &elem)
 				{
-					RBNode<T> *tmp = _root;
+					setRBNode<T> *tmp = _root;
 
 					while (tmp)
 					{
@@ -217,19 +217,19 @@ namespace ft
 					return 0;
 				}
 
-				size_t	erase_node(RBNode<T> *n)
+				size_t	erase_node(setRBNode<T> *n)
 				{
 					size_t ret = 0;
-					RBNode<T> *p = n->parent;
+					setRBNode<T> *p = n->parent;
 					if (n->LCHILD)
 					{
-						RBNode<T> *lmr = left_successor(n);
+						setRBNode<T> *lmr = left_successor(n);
 						_alloc_elem.construct(n->elem, *lmr->elem);
 						ret = erase_node(lmr);
 					}
 					else if (n->RCHILD)
 					{
-						RBNode<T> *rml = right_successor(n);
+						setRBNode<T> *rml = right_successor(n);
 						_alloc_elem.construct(n->elem, *rml->elem);
 						ret = erase_node(rml);
 					}
@@ -252,7 +252,7 @@ namespace ft
 						}
 						else
 						{
-							RBNode<T> *sib = n == p->LCHILD ? p->RCHILD : p->LCHILD;
+							setRBNode<T> *sib = n == p->LCHILD ? p->RCHILD : p->LCHILD;
 							if (n == p->LCHILD) p->LCHILD = NULL;
 							else p->RCHILD = NULL;
 							_alloc_elem.destroy(n->elem);
@@ -266,20 +266,20 @@ namespace ft
 				}
 
 			private:
-				RBNode<T>											*_root;
-				RBNode<T>											*_end;
-				typename Alloc::template rebind<RBNode<T> >::other	_alloc;
+				setRBNode<T>											*_root;
+				setRBNode<T>											*_end;
+				typename Alloc::template rebind<setRBNode<T> >::other	_alloc;
 				Alloc												_alloc_elem;
 				Compare												_comp;
 
 				// Rebalance Tree after Deletion
 
-				void delete_rebalance(RBNode<T> *sib)
+				void delete_rebalance(setRBNode<T> *sib)
 				{
 					if (!sib) return;
-					RBNode<T> *p = sib->parent;
-					RBNode<T> *lneph = sib->LCHILD;
-					RBNode<T> *rneph = sib->RCHILD;
+					setRBNode<T> *p = sib->parent;
+					setRBNode<T> *lneph = sib->LCHILD;
+					setRBNode<T> *rneph = sib->RCHILD;
 					if (sib->col == BLACK)
 					{
 						if (sib == p->RCHILD && (rneph && rneph->col == RED))
@@ -345,8 +345,8 @@ namespace ft
 								if (p == _root) return ;
 								else
 								{
-									RBNode<T> *gp = p->parent;
-									RBNode<T> *s = p == gp->LCHILD ? gp->RCHILD : gp->LCHILD;
+									setRBNode<T> *gp = p->parent;
+									setRBNode<T> *s = p == gp->LCHILD ? gp->RCHILD : gp->LCHILD;
 									delete_rebalance(s);
 								}
 							}
@@ -373,7 +373,7 @@ namespace ft
 
 				// Rebalance Tree after Insertion
 
-				void	rebalance(RBNode<T> *n)
+				void	rebalance(setRBNode<T> *n)
 				{
 					if (!n->parent) return ;
 					else if (!n->parent->parent)
@@ -384,8 +384,8 @@ namespace ft
 					}
 					else
 					{
-						RBNode<T> *Gparent = n->parent->parent;
-						RBNode<T> *uncle = n->parent == Gparent->LCHILD ? Gparent->RCHILD : Gparent->LCHILD;
+						setRBNode<T> *Gparent = n->parent->parent;
+						setRBNode<T> *uncle = n->parent == Gparent->LCHILD ? Gparent->RCHILD : Gparent->LCHILD;
 						if (n->parent->col == BLACK) return ;
 						else if (uncle && uncle->col == RED)
 						{
@@ -433,17 +433,17 @@ namespace ft
 	// Get Successor
 
 	template <class T>
-		RBNode<T> *left_successor(RBNode<T> *n)
+		setRBNode<T> *left_successor(setRBNode<T> *n)
 		{
-			RBNode<T> *tmp = n->LCHILD;
+			setRBNode<T> *tmp = n->LCHILD;
 			while (tmp->RCHILD) tmp = tmp->RCHILD;
 			return tmp;
 		}
 
 	template <class T>
-		RBNode<T> *right_successor(RBNode<T> *n)
+		setRBNode<T> *right_successor(setRBNode<T> *n)
 		{
-			RBNode<T> *tmp = n->RCHILD;
+			setRBNode<T> *tmp = n->RCHILD;
 			while (tmp->LCHILD) tmp = tmp->LCHILD;
 			return tmp;
 		}
@@ -451,7 +451,7 @@ namespace ft
 	// Rotate
 
 	template <class T>
-		void	left_rotate(RBNode<T> *x, RBNode<T> *y)
+		void	left_rotate(setRBNode<T> *x, setRBNode<T> *y)
 		{
 			x->parent = y->parent;
 			if (x->parent)
@@ -466,7 +466,7 @@ namespace ft
 		}
 
 	template <class T>
-		void	right_rotate(RBNode<T> *x, RBNode<T> *y)
+		void	right_rotate(setRBNode<T> *x, setRBNode<T> *y)
 		{
 			x->parent = y->parent;
 			if (x->parent)

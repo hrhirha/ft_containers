@@ -6,13 +6,13 @@
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:04:02 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/10/30 18:41:07 by hrhirha          ###   ########.fr       */
+/*   Updated: 2021/11/01 15:20:32 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SET_HPP
 # define SET_HPP
-# include "RBTree.hpp"
+# include "setRBTree.hpp"
 # include "set_iterator.hpp"
 # include "../tools/Reverse_Iterator.hpp"
 # include "../vector/Vector.hpp"
@@ -34,8 +34,8 @@ namespace ft
 			typedef typename allocator_type::const_reference				const_reference;
 			typedef typename allocator_type::pointer						pointer;
 			typedef typename allocator_type::const_pointer					const_pointer;
-			typedef RBTree<value_type, key_compare, allocator_type>			rbtree;
-			typedef RBNode<value_type>										node;
+			typedef setRBTree<value_type, key_compare, allocator_type>			rbtree;
+			typedef setRBNode<value_type>										node;
 			typedef typename ft::set_iterator<node,rbtree,value_type>		iterator;
 			typedef typename ft::set_iterator<node,rbtree,const value_type>	const_iterator;
 			typedef typename ft::reverse_iterator<iterator>					reverse_iterator;

@@ -6,7 +6,7 @@
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:08:20 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/10/30 19:02:06 by hrhirha          ###   ########.fr       */
+/*   Updated: 2021/11/01 15:25:09 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,12 +302,26 @@ namespace ft
 					if (pos > max_size()) throw std::length_error("vector");
 					if (_capacity >= _size + n)
 					{
-						size_type s_i = pos+n <= _size ? _size : pos+n;
-						size_type e_i = pos+n > _size ? _size : pos+n;
-						for (; s_i >= pos; s_i--)
+						if (_size >= pos+n)
 						{
-							if (s_i < e_i) std::swap(_ptr[s_i+n], _ptr[s_i]);
-							_allocator.construct(&_ptr[s_i], val);
+							for (size_type i = _size-1; i >= pos && i < max_size(); i--)
+							{
+								_allocator.construct(&_ptr[i+n], _ptr[i]);
+								_allocator.destroy(&_ptr[i]);
+								if (i < pos+n) _allocator.construct(&_ptr[i], val);
+							}
+						}
+						else
+						{
+							for (size_type i = pos+n-1; i >= pos && i < max_size(); i--)
+							{
+								if (i < _size)
+								{
+									_allocator.construct(&_ptr[i+n], _ptr[i]);
+									_allocator.destroy(&_ptr[i]);
+								}
+								_allocator.construct(&_ptr[i], val);
+							}
 						}
 						_size += n;
 					}
@@ -344,11 +358,27 @@ namespace ft
 						if (pos > max_size()) throw std::length_error("vector");
 						if (_capacity >= _size + n)
 						{
-							size_type i = _size;
-							for (; i >= pos; i--)
-								_allocator.construct(&_ptr[i+n], _ptr[i]);
-							for(InputIterator tmp_it = first; tmp_it != last; tmp_it++)
-								_allocator.construct(&_ptr[++i], *tmp_it);
+							if (_size >= pos+n)
+							{
+								for (size_type i = _size-1; i >= pos && i < max_size(); i--)
+								{
+									_allocator.construct(&_ptr[i+n], _ptr[i]);
+									_allocator.destroy(&_ptr[i]);
+									if (i < pos+n) _allocator.construct(&_ptr[i], *--last);
+								}
+							}
+							else
+							{
+								for (size_type i = pos+n-1; i >= pos && i < max_size(); i--)
+								{
+									if (i < _size)
+									{
+										_allocator.construct(&_ptr[i+n], _ptr[i]);
+										_allocator.destroy(&_ptr[i]);
+									}
+									_allocator.construct(&_ptr[i], *--last);
+								}
+							}
 							_size += n;
 						}
 						else if (_capacity)
