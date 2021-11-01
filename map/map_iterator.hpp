@@ -6,7 +6,7 @@
 /*   By: hrhirha <hrhirha@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:03:26 by hrhirha           #+#    #+#             */
-/*   Updated: 2021/11/01 13:23:08 by hrhirha          ###   ########.fr       */
+/*   Updated: 2021/11/01 19:16:56 by hrhirha          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,12 @@ namespace ft
 
 			operator map_iterator<Node,Tree,const P>() const { return map_iterator<Node,Tree,const P>(_node, _tree); }
 
-			bool		operator ==(const map_iterator &it) const { return _node == it._node; }
-			bool		operator !=(const map_iterator &it) const { return !(*this == it); }
+			template <class N1, class T1, class P1, class N2, class T2, class P2>
+				friend bool	operator ==(const map_iterator<N1,T1,P1> &x,
+						const map_iterator<N2,T2,P2> &y);
+			template <class N1, class T1, class P1, class N2, class T2, class P2>
+				friend bool	operator !=(const map_iterator<N1,T1,P1> &x,
+						const map_iterator<N2,T2,P2> &y);
 
 			reference	operator *() const { return *_node->elem; }
 			pointer		operator ->() const { return _node->elem; }
@@ -108,6 +112,13 @@ namespace ft
 			Tree *_tree;
 			Node *_node;
 	};
+	
+	template <class N1, class T1, class P1, class N2, class T2, class P2>
+		bool	operator ==(const map_iterator<N1,T1,P1> &x,
+				const map_iterator<N2,T2,P2> &y) { return x._node == y._node; }
+	template <class N1, class T1, class P1, class N2, class T2, class P2>
+		bool	operator !=(const map_iterator<N1,T1,P1> &x,
+				const map_iterator<N2,T2,P2> &y) { return !(x == y); }
 }
 
 #endif

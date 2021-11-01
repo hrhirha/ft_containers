@@ -3,7 +3,7 @@
 #include <deque>
 #include <sys/time.h>
 
-#if 1 //CREATE A REAL STL EXAMPLE
+#if 0 //CREATE A REAL STL EXAMPLE
 # include <map>
 # include <set>
 # include <stack>
@@ -150,7 +150,7 @@ void vector_test()
 		std::cout << "size: " << myvector.size() << ", capacity: " << myvector.capacity() << '\n';
 
 		std::cout << "myvector contains:";
-		for (int i=0;i<myvector.size();i++)
+		for (int i=0;i<(int)myvector.size();i++)
 			std::cout << ' ' << myvector[i];
 		std::cout << '\n';
 	}
@@ -1483,6 +1483,6 @@ int main()
 {
 	vector_test();
 	map_test();
-	set_test();
 	stack_test();
+	set_test();
 }
